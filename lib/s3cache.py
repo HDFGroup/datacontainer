@@ -13,7 +13,6 @@ If not, download the object, save to local cache and return
 path to cached file. 
 """
 def getS3Object(s3_uri):
-    print "s3_prefix:", s3_prefix
     if not s3_uri.startswith(s3_prefix):
         raise IOError("not a s3 uri")
     
@@ -32,7 +31,6 @@ def getS3Object(s3_uri):
     
     local_filepath = os.path.join(s3_cache_dir, s3_path)
     
-    print "local_filepath:", local_filepath
     if os.path.exists(local_filepath):
         # todo, check that the s3 object is the same as local copy
         return local_filepath
