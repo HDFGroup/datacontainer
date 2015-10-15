@@ -56,10 +56,8 @@ def main():
         else:
             v = dset[...]
         # file name GSSTF_NCEP.3.YYYY.MM.DD.he5
-        key = file_name
-        result = [(key, (len(v), np.mean(v), np.median(v), np.std(v)))]
-       
-        print "result: ", result
+         
+        print  file_name, len(v), np.min(v), np.max(v), np.mean(v), np.median(v), np.std(v)
         
 
 main()
