@@ -7,6 +7,25 @@ import argparse
 sys.path.append('../lib')
 from  s3cache import getS3Object
 
+def summary(file_path, h5path):
+    file_path = file_helper(file_path)
+    file_name = os.path.basename(file_path)
+     
+    with h5py.File(file_path, 'r') as f:
+        dset = f[h5path]
+        
+        # mask fill value
+        if '_FillValue' in dset.attrs:
+            tair_2m = dset[...]
+            fill = dset.attrs['_FillValue'][0]
+            v = tair_2m[tair_2m != fill]
+        else:
+            v = dset[...]
+        # file name GSSTF_NCEP.3.YYYY.MM.DD.he5
+         
+        print  file_name, len(v), np.min(v), np.max(v), np.mean(v), np.median(v), np.std(v)
+        
+    
     
 def file_helper(filepath):
     if filepath.startswith("s3://"):
@@ -22,6 +41,7 @@ def file_helper(filepath):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', "--file", help="name of file or s3 uri")
+    parser.add_argument('-fl', "--filelist", help="text file of files or s3 uri")
     parser.add_argument('-p', "--path", help="h5path")
     # example file:
     # public AWS -  
@@ -34,7 +54,7 @@ def main():
     
     args = parser.parse_args()
     
-    if not args.file:
+    if not args.file and not args.filelist:
         print("No filename specified!")
         sys.exit(1)
         
@@ -42,22 +62,17 @@ def main():
         print("No h5path specified!")
         sys.exit(1)
         
-    file_path = file_helper(args.file)
-    file_name = os.path.basename(file_path)
-    result = {}
-    with h5py.File(file_path, 'r') as f:
-        dset = f[args.path]
+    if args.filelist:
+        with open(args.filelist) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line[0] == '#':
+                    continue
+                summary(line, args.path)
+    else:
+        summary(args.file, args.path)
         
-        # mask fill value
-        if '_FillValue' in dset.attrs:
-            tair_2m = dset[...]
-            fill = dset.attrs['_FillValue'][0]
-            v = tair_2m[tair_2m != fill]
-        else:
-            v = dset[...]
-        # file name GSSTF_NCEP.3.YYYY.MM.DD.he5
-         
-        print  file_name, len(v), np.min(v), np.max(v), np.mean(v), np.median(v), np.std(v)
         
+    
 
 main()

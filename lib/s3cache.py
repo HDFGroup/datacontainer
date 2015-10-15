@@ -30,7 +30,7 @@ def getS3Object(s3_uri):
     obj_key = s3_path[(index+1):]
     
     local_filepath = os.path.join(s3_cache_dir, s3_path)
-    
+     
     if os.path.exists(local_filepath):
         # todo, check that the s3 object is the same as local copy
         return local_filepath
@@ -53,7 +53,11 @@ def getS3Object(s3_uri):
         
     bucket = conn.get_bucket(bucket_name)
     key = bucket.get_key(obj_key)
+    
     key.get_contents_to_filename(local_filepath)
+    
+    # statinfo = os.stat(local_filepath)
+    # print "filezie: ", statinfo.st_size
     return local_filepath
      
   

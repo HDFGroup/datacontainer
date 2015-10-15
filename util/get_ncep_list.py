@@ -7,12 +7,13 @@ import urllib2
 
 print 'export no_proxy="griffin-objstore.opensciencedatacloud.org"'
 print 'function with_proxy() {'
-print "     PROXY='http://cloud-proxy:3128'"
-print '    http_proxy="${PROXY}" https_proxy="${PROXY}" ftp_proxy="${PROXY}"  $@'
+print '    PROXY="http://cloud-proxy:3128"'
+print '    http_proxy="${PROXY}" https_proxy="${PROXY}" ftp_proxy="${PROXY}" $@'
 print '}'
 
 url = 'ftp://measures.gsfc.nasa.gov/ftp/data/s4pa/GSSTF/GSSTF_NCEP.3/'
-for year in range(2000, 2009):
+#for year in range(2000, 2009):
+for year in range(1997, 1999):
     req = urllib2.Request(url+str(year))
     rsp = urllib2.urlopen(req)
     page = rsp.read()
