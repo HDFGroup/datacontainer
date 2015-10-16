@@ -13,7 +13,7 @@ print '}'
 
 url = 'ftp://measures.gsfc.nasa.gov/ftp/data/s4pa/GSSTF/GSSTF_NCEP.3/'
 #for year in range(2000, 2009):
-for year in range(1997, 1999):
+for year in range(1987, 2000):
     req = urllib2.Request(url+str(year))
     rsp = urllib2.urlopen(req)
     page = rsp.read()
