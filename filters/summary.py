@@ -1,19 +1,23 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import sys
 import os
 import h5py
 import numpy as np
 import argparse
 
-sys.path.append('../lib')
-from  s3cache import getS3Object
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                             os.path.pardir, 'lib')))
+from s3cache import getS3Object
+
 
 def summary(file_path, h5path):
     file_path = file_helper(file_path)
     file_name = os.path.basename(file_path)
-     
+
     with h5py.File(file_path, 'r') as f:
         dset = f[h5path]
-        
+
         # mask fill value
         if '_FillValue' in dset.attrs:
             tair_2m = dset[...]
@@ -22,11 +26,11 @@ def summary(file_path, h5path):
         else:
             v = dset[...]
         # file name GSSTF_NCEP.3.YYYY.MM.DD.he5
-         
-        print  file_name, len(v), np.min(v), np.max(v), np.mean(v), np.median(v), np.std(v)
-        
-    
-    
+
+        print(file_name, len(v), np.min(v), np.max(v), np.mean(v),
+              np.median(v), np.std(v))
+
+
 def file_helper(filepath):
     if filepath.startswith("s3://"):
         filepath = getS3Object(filepath)
@@ -34,9 +38,9 @@ def file_helper(filepath):
         raise IOError("filepath " + filepath + " does not exist")
     if not h5py.is_hdf5(filepath):
         raise IOError("filepath " + filepath + " is not an HDF5 file")
-    
+
     return filepath
-         
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -44,24 +48,22 @@ def main():
     parser.add_argument('-fl', "--filelist", help="text file of files or s3 uri")
     parser.add_argument('-p', "--path", help="h5path")
     # example file:
-    # public AWS -  
+    # public AWS -
     # s3://hdfgroup/data/hdf5test/GSSTF_NCEP.3.2000.05.01.he5
     # OSDC Ceph -
     # s3://hdfdata/ncep3/GSSTF_NCEP.3.2000.05.01.he5
-    
+
     # example path (for above file):
     # /HDFEOS/GRIDS/NCEP/Data\ Fields/Psea_level
-    
+
     args = parser.parse_args()
-    
+
     if not args.file and not args.filelist:
-        print("No filename specified!")
-        sys.exit(1)
-        
+        sys.exit("No filename specified!")
+
     if not args.path:
-        print("No h5path specified!")
-        sys.exit(1)
-        
+        sys.exit("No h5path specified!")
+
     if args.filelist:
         with open(args.filelist) as f:
             for line in f:
@@ -71,8 +73,6 @@ def main():
                 summary(line, args.path)
     else:
         summary(args.file, args.path)
-        
-        
-    
+
 
 main()
