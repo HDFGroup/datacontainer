@@ -2,8 +2,10 @@ Intro
 -----
 
 This is a brief user guide to for running distributed computing jobs on
-the OSDC Griffin cluster.  We're using the ipyparallel package (https://ipyparallel.readthedocs.org/en/latest/intro.html) as a simple means of coordinating 
-multiple VMs (instances in the Griffin cluster).  This project contains scripts that should make the process of setting up the cluster fairly easy.
+the OSDC Griffin cluster.  We're using the ipyparallel package
+ (https://ipyparallel.readthedocs.org/en/latest/intro.html) as a simple means of coordinating 
+multiple VMs (instances in the Griffin cluster).  This project contains scripts that should make the 
+process of setting up the cluster fairly easy.
 
 THe cluster consists of:
 
@@ -11,7 +13,8 @@ THe cluster consists of:
 * 1 or more engines (which do the actual work)
 * A client python script (or jupyter console) that submits python methods to be run across the cluster.
 
-The engine connects to the controller via a ipycontroller-engine.json file that we will share using the object store.
+The engine connects to the controller via a ipycontroller-engine.json file that we will share using 
+the object store.
 
 Start the controller
 --------------------
@@ -27,7 +30,6 @@ The ipcontroller script will output status messages as engines and clients conne
 In a new terminal window, Run the script 
 ``home/ubuntu/datacontainer/util/ipcontroller.sh [--profile <profile_name>]`` 
 which will copy the ipycontroller-engine.json file to the object store.
-
 
 Start the engines
 -----------------
