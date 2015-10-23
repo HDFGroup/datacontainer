@@ -9,9 +9,9 @@ process of setting up the cluster fairly easy.
 
 THe cluster consists of:
 
-* The controller which manages communication between the client and engines)
-* 1 or more engines (which do the actual work)
-* A client python script (or jupyter console) that submits python methods to be run across the cluster.
+ * The controller which manages communication between the client and engines)
+ * 1 or more engines (which do the actual work)
+ * A client python script (or jupyter console) that submits python methods to be run across the cluster.
 
 The engine connects to the controller via a ipycontroller-engine.json file that we will share using 
 the object store.
