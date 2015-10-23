@@ -34,11 +34,11 @@ which will copy the ipycontroller-engine.json file to the object store.
 Start the engines
 -----------------
 
-From the griffin gateway, run the script ``run_engine.sh [-c <number_of_engines>] ``. 
+From the Griffin gateway, run the script ``run_engine.sh [-c <number_of_engines>] ``. 
  Number of engines specifies how many instances you wish to start.  The script will launch 
  the indicated number of VMs.  As each VM becomes activate it will read the ipycontroller-engine.json 
  from from the object store and start an ipyparallel engine which connects to the controller.  Note: 
- it should not be necessar to ssh into any of the engines.
+ it should not be necessary to ssh into any of the engines.
  
  Run the client
  --------------
