@@ -21,7 +21,7 @@ Start the controller
 
 From the Griffin console, select the latest snapshot image ('snapshot<n>') and launch an instance.  
 This will be the controller instance.  Ssh into this instance and run the command 
-``ipcontroller [--profile <profile_name>] --ip=*``.  The prfile name will be used to identify this 
+``ipcontroller [--profile <profile_name>] --ip=*``.  The profile name will be used to identify this 
 cluster within the OSDC machine.  If profile name is not provided, "profile_default" will be used.
 Note: currently only the default profile is working with the engine script.
 
