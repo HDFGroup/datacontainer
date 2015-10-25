@@ -117,7 +117,7 @@ def main():
     for filename in files:
         batch.append(filename)
         if len(batch) == BATCH_SIZE:
-            dobatch(batch)
+            dobatch(batch, h5path=args.path)
             batch = []
             
     dobatch(batch, h5path=args.path)  # catch any trailers
