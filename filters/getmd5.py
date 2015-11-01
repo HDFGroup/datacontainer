@@ -4,35 +4,24 @@ import sys
 import os
 import subprocess
 import time
-import h5py
-import numpy as np
 import argparse
+import hashlib
 
 BATCH_SIZE = 5  # download files this many at a time
 s3_prefix = "s3://"
 
-def summary(file_path, h5path):
+def getmd5(file_path):
      
     file_name = os.path.basename(file_path)
     
-    print("Summary ", file_path, h5path)
-
-    if not h5py.is_hdf5(file_path):
-        raise IOError("Not an HDF5 file: " + file_path)
-    with h5py.File(file_path, 'r') as f:
-        dset = f[h5path]
-
-        # mask fill value
-        if '_FillValue' in dset.attrs:
-            arr = dset[...]
-            fill = dset.attrs['_FillValue'][0]
-            v = arr[arr != fill]
-        else:
-            v = dset[...]
-        # file name GSSTF_NCEP.3.YYYY.MM.DD.he5
-
-        print(file_name, len(v), np.min(v), np.max(v), np.mean(v),
-              np.median(v), np.std(v))
+    print("md5 ", file_path)
+    
+    hash = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash.update(chunk)
+            
+    print(file_name, hash.hexdigest())
 
     
 def dobatch(filelist, **kwargs):
@@ -73,7 +62,7 @@ def dobatch(filelist, **kwargs):
                     pass  # success!
     print("downloads complete")
     for filename in downloaded_files:
-        summary(filename, kwargs['h5path'] )        
+        getmd5(filename)        
      
     
 
@@ -81,7 +70,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', "--filename", help="name of file or s3 uri")
     parser.add_argument('-i', "--input", help="text file of files or s3 uri")
-    parser.add_argument('-p', "--path", help="h5path")
     parser.add_argument('-c', "--cluster", help="cluster profile")
     # example file:
     # public AWS -
@@ -97,9 +85,6 @@ def main():
 
     if not args.filename and not args.input:
         sys.exit("No filename specified!")
-
-    if not args.path:
-        sys.exit("No h5path specified!")
 
     files = []
     if args.input:
@@ -117,10 +102,10 @@ def main():
     for filename in files:
         batch.append(filename)
         if len(batch) == BATCH_SIZE:
-            dobatch(batch, h5path=args.path)
+            dobatch(batch)
             batch = []
             
-    dobatch(batch, h5path=args.path)  # catch any trailers
+    dobatch(batch)  # catch any trailers
 
 
 main()
