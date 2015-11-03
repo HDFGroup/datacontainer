@@ -8,9 +8,7 @@ import h5py
 import numpy 
 import argparse
 from ipyparallel import Client
-
-BATCH_SIZE = 5  # download files this many at a time
-
+ 
 file_names = []
 h5path = None
 
@@ -77,76 +75,12 @@ def process_files():
                     pass  # success!
                     
     print("downloads complete")
-    print("h5path", h5path)
+   
     return_values = []
     for filename in downloaded_files:
         output = summary(filename, h5path )   
         return_values.append(output)
     return return_values     
-    
-def dobatch(filelist, **kwargs):
-    downloads = []  # handles to sub-processes
-    s3_cache_dir = os.environ["S3_CACHE_DIR"]
-    downloaded_files = []
-    for filename in filelist:
-        if filename.startswith(s3_prefix):
-            if s3_cache_dir is None:
-                raise IOError("Environment variable S3_CACHE_DIR not set")
-            s3_path = filename[len(s3_prefix):]
-            s3_uri = filename
-            local_filepath = os.path.join(s3_cache_dir, s3_path)
-     
-            if os.path.exists(local_filepath):
-                # todo, check that the s3 object is the same as local copy
-                pass
-            else:
-                p = subprocess.Popen(['s3cmd', 'get', s3_uri, local_filepath])
-                downloads.append(p)
-            downloaded_files.append(local_filepath)
-        else:
-            downloaded_files.append(filename)
-            
-    if len(downloads) > 0:
-        done = False
-        while not done:
-            print('.')
-            time.sleep(1)
-            done = True
-            for p in downloads:
-                p.poll()
-                if p.returncode is None:
-                    done = False # still waiting on a download
-                elif p.returncode < 0:
-                    raise IOError("s3cmd failed for " + filename)
-                else:
-                    pass  # success!
-                    
-    print("downloads complete")
-    h5path = kwargs['h5path']
-    if "dview" in kwargs and kwargs["dview"]:
-        dview = kwargs["cluster"]
-        results = []
-        engine = 0
-        for filename in downloaded_files:
-            dview = rc[engine]
-            result = dview.apply(summary, filename, h5path)
-            results.append(result)   
-            engine = (engine + 1) % num_engines  # move on to next engine
-        ready = False
-        while not ready:
-            ready = True
-            for result in results:
-                if not result.ready():
-                    ready = False
-                    break
-        print("ready!")
-        for result in results:
-            print(result.get())
-    else:
-        for filename in downloaded_files:
-            output = summary(filename, h5path )   
-            print(output)     
-     
     
 
 def main():
@@ -186,7 +120,6 @@ def main():
     else:
         file_names.append(args.filename)
          
-        
     rc = None # client interface for cluster mode
     dview = None
         
@@ -225,17 +158,5 @@ def main():
                 print(item)
         else:
             print(elem)
-                 
-
-    
-    """
-    batch = []    
-    for filename in files:
-        batch.append(filename)
-        if len(batch) == BATCH_SIZE:
-            dobatch(batch, h5path=args.path, dview=dview)
-            batch = []
-    """        
-    #dobatch(batch, h5path=args.path, dview=dview)  # catch any trailers
-
+      
 main()
