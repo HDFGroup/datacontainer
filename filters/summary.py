@@ -137,6 +137,7 @@ def main():
             import time
             import h5py
             import numpy
+            import subprocess
         # send the summary method to engines
         dview.push(dict(summary=summary))
         
