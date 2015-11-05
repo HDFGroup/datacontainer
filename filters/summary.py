@@ -173,7 +173,7 @@ def main():
         # run process_files on engines
         output = dview.apply(processFiles)
     else:
-        startFileDownlaod()
+        startFileDownload()
         while not checkDownloadComplete():
             time.sleep(1)  # wait for downloads
             
