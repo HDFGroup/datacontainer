@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import sys
 import os
+import time
 import subprocess
 import time
 import h5py
@@ -10,6 +11,8 @@ import argparse
 from ipyparallel import Client
  
 file_names = []
+downloaded_files = []
+subprocesses = []
 h5path = None
 
 def summary(file_path, h5path):
@@ -35,12 +38,14 @@ def summary(file_path, h5path):
         return(file_name, len(v), numpy.min(v), numpy.max(v), numpy.mean(v),
               numpy.median(v), numpy.std(v))
               
-def process_files():
-    print("process files")
+def startFileDownload():
+    print("start file download")
     s3_prefix = "s3://"
-    downloads = []  # handles to sub-processes
+    
     s3_cache_dir = os.environ["S3_CACHE_DIR"]
-    downloaded_files = []
+    downloaded_files.clear()
+    subprocesses.clear() 
+        
     for filename in file_names:
         if filename.startswith(s3_prefix):
             if s3_cache_dir is None:
@@ -54,28 +59,29 @@ def process_files():
                 pass
             else:
                 p = subprocess.Popen(['s3cmd', 'get', s3_uri, local_filepath])
-                downloads.append(p)
+                subprocesses.append(p)
             downloaded_files.append(local_filepath)
         else:
             downloaded_files.append(filename)
             
-    if len(downloads) > 0:
-        done = False
-        while not done:
-            print('.')
-            time.sleep(1)
-            done = True
-            for p in downloads:
-                p.poll()
-                if p.returncode is None:
-                    done = False # still waiting on a download
-                elif p.returncode < 0:
-                    raise IOError("s3cmd failed for " + filename)
-                else:
-                    pass  # success!
+def checkDownloadComplete():
+    print("checkDownloadComplete()")
+    done = True        
+    if len(subprocesses) > 0:
+        for p in subprocesses:
+            p.poll()
+            if p.returncode is None:
+                done = False # still waiting on a download
+            elif p.returncode < 0:
+                raise IOError("s3cmd failed for " + filename)
+            else:
+                pass  # success!
+    if done:
+        print("download complete!")            
+    return done
                     
-    print("downloads complete")
-   
+def processFiles():
+    print("processFiles()")
     return_values = []
     for filename in downloaded_files:
         output = summary(filename, h5path )   
@@ -134,7 +140,6 @@ def main():
         with dview.sync_imports():
             import sys
             import os
-            import time
             import h5py
             import numpy
             import subprocess
@@ -143,14 +148,36 @@ def main():
         
         # push the path name
         dview.push(dict(h5path=h5path))
+        # push downloaded_files
+        dview.push(dict(downloaded_files=downloaded_files))
+        # push subprocesses
+        dview.push(dict(subprocesses=subprocesses))
        
         # split file_names across engines
         dview.scatter('file_names', file_names)
-       
+        
+        # start download
+        dview.apply(startFileDownload)
+        
+        # wait for downloads
+        while True:
+            # check for download check
+            download_complete = dview.apply(checkDownloadComplete)
+            if all(download_complete):
+                print("downloads complete")
+                break
+            print(".")
+            time.sleep(1)
+        
+        print("start processing")
         # run process_files on engines
-        output = dview.apply(process_files)
+        output = dview.apply(processFiles)
     else:
-        output = process_files() # just run locally
+        startFileDownlaod()
+        while not checkDownloadComplete():
+            time.sleep(1)  # wait for downloads
+            
+        output = processFiles() # just run locally
        
     for elem in output:
         if type(elem) is list:
