@@ -27,6 +27,7 @@ for line in lines:
     if not filename.endswith('.nc'):
         continue
 
-    print("with_proxy wget", url+filename)
-    print("s3cmd -v put ", filename, "s3://hdfdata/cortad/")
-    print("rm -v", filename)
+    print('\nwith_proxy wget', url+filename)
+    print('h5dump -A', filename, '> /dev/null &&',
+          's3cmd -v put ', filename, 's3://hdfdata/cortad/')
+    print('rm -v', filename)
