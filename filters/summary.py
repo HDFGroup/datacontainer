@@ -11,9 +11,10 @@ import argparse
 from ipyparallel import Client
  
 file_names = []
-downloaded_files = []
-subprocesses = []
+downloads = {}
 h5path = None
+s3cmd_batch_size=2
+s3_prefix = "s3://"
 
 def summary(file_path, h5path):
    
@@ -40,42 +41,73 @@ def summary(file_path, h5path):
               
 def startFileDownload():
     print("start file download")
-    s3_prefix = "s3://"
     
     s3_cache_dir = os.environ["S3_CACHE_DIR"]
-    downloaded_files.clear()
-    subprocesses.clear() 
+    downloads.clear()
+    
+    subprocesses = 0
         
     for filename in file_names:
+        download = {}
         if filename.startswith(s3_prefix):
             if s3_cache_dir is None:
                 raise IOError("Environment variable S3_CACHE_DIR not set")
             s3_path = filename[len(s3_prefix):]
             s3_uri = filename
+            download["s3_uri"] = s3_uri
             local_filepath = os.path.join(s3_cache_dir, s3_path)
+            download["local_filepath"] = local_filepath  
      
             if os.path.exists(local_filepath):
-                # todo, check that the s3 object is the same as local copy
-                pass
+                # todo, check that the s3 object is the same as local copy  
+                download["state"] = "COMPLETE"          
             else:
-                p = subprocess.Popen(['s3cmd', 'get', s3_uri, local_filepath])
-                subprocesses.append(p)
-            downloaded_files.append(local_filepath)
+                if subprocesses < s3cmd_batch_size:
+                    # start a new download process
+                    p = subprocess.Popen(['s3cmd', 'get', s3_uri, local_filepath])
+                    download["subprocess"] = p
+                    subprocesses += 1
+                    download["state"] = "INPROGRESS"
+                else:
+                    download["state"] = "PENDING"       
         else:
-            downloaded_files.append(filename)
-            
+            if os.path.exists(filename):
+                download["state"] = "COMPLETE"
+                download["local_filepath"] = filename
+            else:
+                download["state"] = "FAILED"
+        downloads[filename] = download
+             
 def checkDownloadComplete():
     print("checkDownloadComplete()")
+    in_process_count = 0
+    queued_items = []
     done = True        
-    if len(subprocesses) > 0:
-        for p in subprocesses:
+    for filename in downloads.keys():
+        download = downloads[filename]
+        if download["state"] == 'INPROGRESS':
+            p = download['subprocess']
             p.poll()
             if p.returncode is None:
                 done = False # still waiting on a download
+                in_process_count += 1
             elif p.returncode < 0:
                 raise IOError("s3cmd failed for " + filename)
             else:
-                pass  # success!
+                download["state"] = "COMPLETE" 
+        elif download["state"] == "PENDING":
+             queued_items.append(download)   
+             done = False     
+             
+    if len(queued_items) > 0:
+        for download in queued_items:
+            if in_process_count >= s3cmd_batch_size:
+                break # don't start any more subprocesses just yet
+            p = subprocess.Popen(['s3cmd', 'get', download["s3_uri"], download["local_filepath"]])
+            download["subprocess"] = p
+            download["state"] = "INPROGRESS"
+            in_process_count += 1
+        
     if done:
         print("download complete!")            
     return done
@@ -83,8 +115,13 @@ def checkDownloadComplete():
 def processFiles():
     print("processFiles()")
     return_values = []
-    for filename in downloaded_files:
-        output = summary(filename, h5path )   
+    
+    filenames = list(downloads.keys())
+    filenames.sort()
+    for filename in filenames:
+        download = downloads[filename]
+        print(download)
+        output = summary(download["local_filepath"], h5path )   
         return_values.append(output)
     return return_values     
     
@@ -145,14 +182,15 @@ def main():
             import subprocess
         # send the summary method to engines
         dview.push(dict(summary=summary))
-        
         # push the path name
         dview.push(dict(h5path=h5path))
         # push downloaded_files
-        dview.push(dict(downloaded_files=downloaded_files))
-        # push subprocesses
-        dview.push(dict(subprocesses=subprocesses))
-       
+        dview.push(dict(downloads={}))
+        # push batch size
+        dview.push(dict(s3cmd_batch_size=5))
+        # push s3 s3_prefix
+        dview.push(dict(s3_prefix=s3_prefix))
+         
         # split file_names across engines
         dview.scatter('file_names', file_names)
         
