@@ -54,7 +54,8 @@ docs/_build/
 target/
 
 # virtualenv
-lib/
+lib/__pycache__
+lib/python*
 share/
 bin/
 include/
