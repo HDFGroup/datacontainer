@@ -6,6 +6,9 @@ size.
 import math
 import numpy as np
 
+# Hard upper limit for chunk size (1MiB)
+CHUNK_MAX = 1024*1024
+
 
 """
 Unidata Algorithm
@@ -16,12 +19,12 @@ access.
 The code fetched from:
     http://www.unidata.ucar.edu/staff/russ/public/chunk_shape_3D.py
 """
-def unidata_chunk(varShape, valSize=4, chunkSize=4096):
+def unidata_chunk(varShape, valSize=4, chunkSize=CHUNK_MAX):
     """
     Return a 'good shape' for a 3D variable, assuming balanced 1D, 2D access
 
     varShape  -- length 3 list of variable dimension sizes
-    chunkSize -- maximum chunksize desired, in bytes (default 4096)
+    chunkSize -- maximum chunksize desired, in bytes (default 1MiB)
     valSize   -- size of each data value, in bytes (default 4)
 
     Returns integer chunk lengths of a chunk shape that provides
@@ -103,7 +106,7 @@ def unidata_chunk(varShape, valSize=4, chunkSize=4096):
         if bestChunkSize < thisChunkSize <= chunkSize:
             bestChunkSize = thisChunkSize
             cBest = list(cCand)  # make a copy of best candidate so far
-    return list(map(int, cBest))
+    return tuple(map(int, cBest))
 
 
 """
@@ -114,16 +117,15 @@ From: https://github.com/h5py/h5py/blob/master/h5py/_hl/filters.py#L252
 Used when dataset to be created requires chunking but the user has not provided
 chunk shape.
 """
-def h5py_chunk(shape, maxshape, typesize):
-    """ Guess an appropriate chunk layout for a dataset, given its shape and
-    the size of each element in bytes.  Will allocate chunks only as large
-    as MAX_SIZE.  Chunks are generally close to some power-of-2 fraction of
-    each axis, slightly favoring bigger values for the last index.
-    Undocumented and subject to change without warning.
+def h5py_chunk(shape, typesize=4, chunk_size=CHUNK_MAX):
+    """Guess an appropriate chunk layout for a dataset given its shape, the
+    size of each element in bytes (default 4) and chunk size in bytes (default
+    1MiB). Chunks are generally close to some power-of-2 fraction of each axis,
+    slightly favoring bigger values for the last index. Undocumented and
+    subject to change without warning.
     """
     CHUNK_BASE = 16*1024    # Multiplier by which chunks are adjusted
-    CHUNK_MIN = 8*1024      # Soft lower limit (8k)
-    CHUNK_MAX = 1024*1024   # Hard upper limit (1M)
+    CHUNK_MIN = 8*1024      # Soft lower limit (8KiB)
 
     # For unlimited dimensions we have to guess 1024
     shape = tuple((x if x != 0 else 1024) for i, x in enumerate(shape))
@@ -138,11 +140,11 @@ def h5py_chunk(shape, maxshape, typesize):
 
     # Determine the optimal chunk size in bytes using a PyTables expression.
     # This is kept as a float.
-    dset_size = np.product(chunks)*typesize
+    dset_size = np.product(chunks)*int(typesize)
     target_size = CHUNK_BASE * (2**np.log10(dset_size/(1024.*1024)))
 
-    if target_size > CHUNK_MAX:
-        target_size = CHUNK_MAX
+    if target_size > chunk_size:
+        target_size = chunk_size
     elif target_size < CHUNK_MIN:
         target_size = CHUNK_MIN
 
@@ -153,15 +155,15 @@ def h5py_chunk(shape, maxshape, typesize):
         # 1b. We're within 50% of the target chunk size, AND
         #  2. The chunk is smaller than the maximum chunk size
 
-        chunk_bytes = np.product(chunks)*typesize
+        chunk_bytes = np.product(chunks)*int(typesize)
 
         if ((chunk_bytes < target_size
                 or abs(chunk_bytes-target_size)/target_size < 0.5)
-                and chunk_bytes < CHUNK_MAX):
+                and chunk_bytes < chunk_size):
             break
 
         if np.product(chunks) == 1:
-            break  # Element size larger than CHUNK_MAX
+            break  # Element size larger than chunk_size
 
         chunks[idx % ndims] = np.ceil(chunks[idx % ndims] / 2.0)
         idx += 1
