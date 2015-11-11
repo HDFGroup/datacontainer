@@ -1,0 +1,11 @@
+title: NCEP3
+format: NetCDF4 (HDF5)
+Number Files: 7850
+Total Size: 122GB
+File Size: 16MB
+Compression: ZLIB (deflate)
+Chunking: (45,180)
+Source: ftp://measures.gsfc.nasa.gov/ftp/data/s4pa/GSSTF/GSSTF_NCEP.3/
+Description: Goddard Satelite-based Surface Turbulent Fluxes v. 3.  World-wide gridded 
+datasets.  One file per day, 1987-07-01 through 2008-12-31
+location: s3://hdfdata/ncep3/
