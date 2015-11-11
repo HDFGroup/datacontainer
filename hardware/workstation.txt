@@ -1,0 +1,5 @@
+CPU: Intel(R) Core(TM) i7-4771 CPU @ 3.50GHz
+RAM: 32 GB
+Storage: 440 GB SSD
+OS: Linux/Centos 6
+Nodes: 1

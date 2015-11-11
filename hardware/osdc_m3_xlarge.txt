@@ -1,0 +1,5 @@
+CPU: Intel(R) Xeon E312xx (Sandy Bridge)
+RAM: 24 GB
+Storage: 256 GB
+OS: Linux/Ubuntu
+Nodes: 1-20
