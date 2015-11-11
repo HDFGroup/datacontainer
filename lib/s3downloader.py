@@ -218,7 +218,7 @@ class S3Download:
         # 0 -> download COMPLETE
         return pending_count + inprocess_count
     
-    def getDownloadSize(self):
+    def downloadsize(self):
         """Get the number of bytes to be downloaded.
         """
         keys = list(self.downloads.keys())
@@ -240,7 +240,7 @@ class S3Download:
         """
         # verify that we have enough free space for the download
         freespace = self.freespace()
-        download_size = self.getDownloadSize()
+        download_size = self.downloadsize()
         if download_size > freespace:
             msg = "not enough free space to download: " + str(download_size)
             msg += ", " + str(freespace) + " available"
