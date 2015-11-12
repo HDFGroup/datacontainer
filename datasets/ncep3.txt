@@ -1,8 +1,8 @@
 title: NCEP3
 format: HDF-EOS5 (HDF5)
 Number Files: 7850
-Total Size: 122GB
-File Size: 16MB
+Total Size: 130.55GB
+File Size: 16631632B
 Compression: None
 Chunking: None
 Source: ftp://measures.gsfc.nasa.gov/ftp/data/s4pa/GSSTF/GSSTF_NCEP.3/

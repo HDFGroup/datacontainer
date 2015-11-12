@@ -1,8 +1,8 @@
 title: NCEP3
 format: HDF-EOS5 (HDF5)
 Number Files: 7850
-Total Size: 122GB
-File Size: 16MB
+Total Size: 47.88GB
+File Size: varies, average 6,099,499B
 Compression: ZLIB (deflate)
 Chunking: (45,180)
 Source: ftp://measures.gsfc.nasa.gov/ftp/data/s4pa/GSSTF/GSSTF_NCEP.3/
@@ -14,8 +14,8 @@ location: s3://hdfdata/ncep3_chunk_45_180_gzip_9/
 title: NCEP3
 format: HDF-EOS5 (HDF5)
 Number Files: 7850
-Total Size: 122GB
-File Size: 16MB
+Total Size: 49.86GB
+File Size: varies, average 6,352,181B
 Compression: ZLIB (deflate)
 Chunking: (22, 46)
 Source: ftp://measures.gsfc.nasa.gov/ftp/data/s4pa/GSSTF/GSSTF_NCEP.3/
