@@ -7,9 +7,9 @@ do
   	-p | --profile )     shift
                              profile=$1
                              ;;
-    -h | --help )       echo "Usage: ipcontroller.sh [-p <profile>]"
+    -h | --help )       echo "Usage: $(basename $0) [-p <profile>]"
                         exit
-                        ;; 
+                        ;;
   esac
   shift
 done
@@ -27,4 +27,4 @@ then
 fi
 
 echo "starting ipengine"
-ipengine 
+ipengine
