@@ -68,12 +68,19 @@ S3cmd is a CLI tool for reading and writing to the object store.  The configurat
 Usage page is here, http://s3tools.org/usage, but some common examples are:
 
 * List all buckets
+
         $ s3cmd ls
+
 * List items in `hdfdata` bucket
+* 
         $ s3cmd ls s3://hdfdata/
+
 * Download a file from the object store
+
         $ s3cmd get s3://hdfdata/ncep3/GSSTF_NCEP.3.2008.12.31.he5.xml
+
 * Copy file `foo` to `hdftest` bucket
+
         $ s3cmd put foo s3://hdftest
 
 # Nova Client
@@ -81,14 +88,23 @@ Usage page is here, http://s3tools.org/usage, but some common examples are:
 From Griffin you can access the nova cli to monitor, create, and remove VMs:
 
 * List all running VMs
+
         $ nova list
+
 * List image and snapshots
+
         $ nova image-list
+
 * List avilable machine types
+
         $ nova flavor-list
+
 * Launch a VM with given snapshot and name
+
         $ nova boot --flavor m1.small --snapshot <snapshot-id> --key-name osdc_keypair <name>
+
 * Delete VM 'mytest'
+
         $ nova delete mytest
 
 Full user guide is at: http://docs.openstack.org/cli-reference/content/
