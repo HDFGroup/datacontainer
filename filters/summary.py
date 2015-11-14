@@ -2,14 +2,13 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import sys
 import os
-import time
 import subprocess
 import time
 import h5py
-import numpy 
+import numpy
 import argparse
 from ipyparallel import Client
- 
+
 file_names = []
 downloads = {}
 h5path = None
@@ -17,9 +16,9 @@ s3cmd_batch_size=2
 s3_prefix = "s3://"
 
 def summary(file_path, h5path):
-   
+
     file_name = os.path.basename(file_path)
-     
+
     #print("Summary ", file_path, h5path)
 
     if not h5py.is_hdf5(file_path):
@@ -38,15 +37,15 @@ def summary(file_path, h5path):
 
         return(file_name, len(v), numpy.min(v), numpy.max(v), numpy.mean(v),
               numpy.median(v), numpy.std(v))
-              
+
 def startFileDownload():
     print("start file download")
-    
+
     s3_cache_dir = os.environ["S3_CACHE_DIR"]
     downloads.clear()
-    
+
     subprocesses = 0
-        
+
     for filename in file_names:
         download = {}
         if filename.startswith(s3_prefix):
@@ -56,11 +55,11 @@ def startFileDownload():
             s3_uri = filename
             download["s3_uri"] = s3_uri
             local_filepath = os.path.join(s3_cache_dir, s3_path)
-            download["local_filepath"] = local_filepath  
-     
+            download["local_filepath"] = local_filepath
+
             if os.path.exists(local_filepath):
-                # todo, check that the s3 object is the same as local copy  
-                download["state"] = "COMPLETE"          
+                # todo, check that the s3 object is the same as local copy
+                download["state"] = "COMPLETE"
             else:
                 if subprocesses < s3cmd_batch_size:
                     # start a new download process
@@ -69,7 +68,7 @@ def startFileDownload():
                     subprocesses += 1
                     download["state"] = "INPROGRESS"
                 else:
-                    download["state"] = "PENDING"       
+                    download["state"] = "PENDING"
         else:
             if os.path.exists(filename):
                 download["state"] = "COMPLETE"
@@ -77,12 +76,12 @@ def startFileDownload():
             else:
                 download["state"] = "FAILED"
         downloads[filename] = download
-             
+
 def checkDownloadComplete():
     print("checkDownloadComplete()")
     in_process_count = 0
     queued_items = []
-    done = True        
+    done = True
     for filename in downloads.keys():
         download = downloads[filename]
         if download["state"] == 'INPROGRESS':
@@ -94,11 +93,11 @@ def checkDownloadComplete():
             elif p.returncode < 0:
                 raise IOError("s3cmd failed for " + filename)
             else:
-                download["state"] = "COMPLETE" 
+                download["state"] = "COMPLETE"
         elif download["state"] == "PENDING":
-             queued_items.append(download)   
-             done = False     
-             
+             queued_items.append(download)
+             done = False
+
     if len(queued_items) > 0:
         for download in queued_items:
             if in_process_count >= s3cmd_batch_size:
@@ -107,24 +106,24 @@ def checkDownloadComplete():
             download["subprocess"] = p
             download["state"] = "INPROGRESS"
             in_process_count += 1
-        
+
     if done:
-        print("download complete!")            
+        print("download complete!")
     return done
-                    
+
 def processFiles():
     print("processFiles()")
     return_values = []
-    
+
     filenames = list(downloads.keys())
     filenames.sort()
     for filename in filenames:
         download = downloads[filename]
         print(download)
-        output = summary(download["local_filepath"], h5path )   
+        output = summary(download["local_filepath"], h5path )
         return_values.append(output)
-    return return_values     
-    
+    return return_values
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -140,7 +139,7 @@ def main():
 
     # example path (for above file):
     # /HDFEOS/GRIDS/NCEP/Data\ Fields/Psea_level
-    
+
 
     args = parser.parse_args()
 
@@ -151,7 +150,7 @@ def main():
         sys.exit("No h5path specified!")
     global h5path
     h5path = args.path
-    
+
     files = []
     if args.input:
         with open(args.input) as f:
@@ -159,20 +158,20 @@ def main():
                 line = line.strip()
                 if not line or line[0] == '#':
                     continue
-                file_names.append(line)              
+                file_names.append(line)
     else:
         file_names.append(args.filename)
-         
+
     rc = None # client interface for cluster mode
     dview = None
-        
+
     if args.cluster:
         rc = Client()
         if len(rc.ids) == 0:
             sys.exit("No engines found")
         print(len(rc.ids), "engines")
         dview = rc[:]
-        dview.block = True # use sync 
+        dview.block = True # use sync
         # have engines import packages
         with dview.sync_imports():
             import sys
@@ -190,13 +189,13 @@ def main():
         dview.push(dict(s3cmd_batch_size=5))
         # push s3 s3_prefix
         dview.push(dict(s3_prefix=s3_prefix))
-         
+
         # split file_names across engines
         dview.scatter('file_names', file_names)
-        
+
         # start download
         dview.apply(startFileDownload)
-        
+
         # wait for downloads
         while True:
             # check for download check
@@ -206,7 +205,7 @@ def main():
                 break
             print(".")
             time.sleep(1)
-        
+
         print("start processing")
         # run process_files on engines
         output = dview.apply(processFiles)
@@ -214,9 +213,9 @@ def main():
         startFileDownload()
         while not checkDownloadComplete():
             time.sleep(1)  # wait for downloads
-            
+
         output = processFiles() # just run locally
-       
+
     for elem in output:
         if type(elem) is list:
             #output from engines, break out each tuple
@@ -224,5 +223,5 @@ def main():
                 print(item)
         else:
             print(elem)
-      
+
 main()
