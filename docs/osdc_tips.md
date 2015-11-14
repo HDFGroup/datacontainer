@@ -72,7 +72,7 @@ Usage page is here, http://s3tools.org/usage, but some common examples are:
         $ s3cmd ls
 
 * List items in `hdfdata` bucket
-* 
+*
         $ s3cmd ls s3://hdfdata/
 
 * Download a file from the object store
@@ -103,8 +103,12 @@ From Griffin you can access the nova cli to monitor, create, and remove VMs:
 
         $ nova boot --flavor m1.small --snapshot <snapshot-id> --key-name osdc_keypair <name>
 
-* Delete VM 'mytest'
+* Delete VM `mytest`
 
         $ nova delete mytest
 
-Full user guide is at: http://docs.openstack.org/cli-reference/content/
+* Delete all VMs with `{STRING}` in their name
+
+        nova delete $(nova list | cut -d " " -f 4 | grep {STRING} | tr '\n' ' ')
+
+Full user guide is at: http://docs.openstack.org/cli-reference/content/.
