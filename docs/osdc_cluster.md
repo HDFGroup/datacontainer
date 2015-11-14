@@ -49,7 +49,7 @@ interface, or use the ipython console for interactive investigations.
 To run the console type ``jupyter console``.  In either case, your code will get a client interface via::
 
 ```python
-    >>> from ipyparallel import Client
+>>> from ipyparallel import Client
 >>> rc = Client()
 >>> rc.ids
 [0, 1, 2, 3]
