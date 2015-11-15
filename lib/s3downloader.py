@@ -35,12 +35,12 @@ class S3Download:
     def freespace(self):
         """Get the amount of free space available.
         """
-        return shutil.disk_space(self.s3_dir).free
+        return shutil.disk_usage(self.s3_dir).free
 
     def usedspace(self):
         """Get the number of bytes used in the s3 download directory.
         """
-        return shutil.disk_space(self.s3_dir).used
+        return shutil.disk_usage(self.s3_dir).used
 
     def rmrf(self, pdir):
         """ Remove all files in the given directory.
@@ -84,7 +84,7 @@ class S3Download:
             if line:
                 fields = line.split()
                 # expecting something like:
-                # 2015-10-23 07:44  16631632 # s3://hdfdata/ncep3/GSSTF_NCEP.3.1987.07.01.he5
+                # 2015-10-23 07:44  16631632 s3://hdfdata/ncep3/GSSTF_NCEP.3.1987.07.01.he5
                 if len(fields) == 2 and fields[0] == "DIR":
                     # ignore dirs
                     continue
