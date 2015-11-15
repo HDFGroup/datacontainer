@@ -203,7 +203,7 @@ class S3Download:
         for s3_uri in keys:
             download = self.downloads[s3_uri]
             state = download["state"]
-            if state in ("PENDING" or "INPROGRESS"):
+            if state in ("PENDING", "INPROGRESS"):
                 download_size += download["size"]
         return download_size
 
