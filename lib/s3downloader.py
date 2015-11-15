@@ -212,7 +212,7 @@ class S3Download:
         not sufficient to store objects in download queue.
         """
         # verify that we have enough free space for the download
-        freespace = self.freespace()
+        freespace = self.freespace
         download_size = self.downloadsize()
         if download_size > freespace:
             msg = "not enough free space to download: " + str(download_size)
