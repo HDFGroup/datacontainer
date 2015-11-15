@@ -32,11 +32,13 @@ class S3Download:
 
         self.log.info("s3_dir: " + self.s3_dir)
 
+    @property
     def freespace(self):
         """Get the amount of free space available.
         """
         return shutil.disk_usage(self.s3_dir).free
 
+    @property
     def usedspace(self):
         """Get the number of bytes used in the s3 download directory.
         """
