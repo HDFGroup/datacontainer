@@ -9,6 +9,7 @@ import numpy
 import argparse
 from ipyparallel import Client
 
+
 file_names = []
 downloads = {}
 h5path = None
@@ -22,7 +23,9 @@ def summary(file_path, h5path):
 
     # print("Summary ", file_path, h5path)
 
-    if not h5py.is_hdf5(file_path):
+    if not os.path.exists(file_path):
+        raise IOError(platform.node() + ': File does not exist: ' + file_path)
+    elif not h5py.is_hdf5(file_path):
         raise IOError(platform.node() + ": Not an HDF5 file: " + file_path)
     with h5py.File(file_path, 'r') as f:
         dset = f[h5path]
