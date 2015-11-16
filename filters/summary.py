@@ -20,10 +20,10 @@ def summary(file_path, h5path):
 
     file_name = os.path.basename(file_path)
 
-    #print("Summary ", file_path, h5path)
+    # print("Summary ", file_path, h5path)
 
     if not h5py.is_hdf5(file_path):
-        raise IOError("Not an HDF5 file: " + file_path)
+        raise IOError(platform.node() + ": Not an HDF5 file: " + file_path)
     with h5py.File(file_path, 'r') as f:
         dset = f[h5path]
 
@@ -183,6 +183,7 @@ def main():
             import h5py
             import numpy
             import subprocess
+            import platform
         # send the summary method to engines
         dview.push(dict(summary=summary))
         # push the path name
@@ -212,17 +213,23 @@ def main():
 
         print("start processing")
         # run process_files on engines
+        start_time = time.time()
         output = dview.apply(processFiles)
+        end_time = time.time()
+        print('>>>>> runtime: ', end_time - start_time)
     else:
         startFileDownload()
         while not checkDownloadComplete():
             time.sleep(1)  # wait for downloads
 
+        start_time = time.time()
         output = processFiles()  # just run locally
+        end_time = time.time()
+        print('>>>>> runtime: ', end_time - start_time)
 
     for elem in output:
         if type(elem) is list:
-            #output from engines, break out each tuple
+            # output from engines, break out each tuple
             for item in elem:
                 print(item)
         else:
