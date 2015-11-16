@@ -1,7 +1,7 @@
 # Intro
 
 This is a brief user guide to for running distributed computing jobs on
-the OSDC Griffin cluster.  We're using the ipyparallel package (https://ipyparallel.readthedocs.org/en/latest/intro.html)
+the OSDC Griffin cluster.  We're using the [ipyparallel package](https://ipyparallel.readthedocs.org/en/latest/intro.html)
 as a simple means of coordinating multiple VMs (instances in the Griffin cluster).
 This project contains scripts that should make the process of setting up the cluster fairly easy.
 
