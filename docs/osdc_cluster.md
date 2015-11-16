@@ -47,7 +47,12 @@ Now we are ready to run client programs that will utilize the cluster.  On the c
 terminal window where you ran ipcontroller.sh), you can run python scripts that use the ipyparallel Client
 interface, or use the ipython console for interactive investigations.
 To run the console type ``jupyter console``.  In either case, your code will get a client interface via::
-
+```bash
+(py34)ubuntu@ipcontroller:~$ python
+Python 3.4.3 |Continuum Analytics, Inc.| (default, Oct 19 2015, 21:52:17) 
+[GCC 4.4.7 20120313 (Red Hat 4.4.7-1)] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+```
 ```python
 >>> from ipyparallel import Client
 >>> rc = Client()
