@@ -43,7 +43,7 @@ Number of engines specifies how many instances you wish to start.  The script wi
 
 # Run the client
 
-Now we are ready to run client programs that will utilize the cluster.  On the controller instance (the
+Now we are ready to run client programs that will utilize the cluster.  On the *controller instance* (the
 terminal window where you ran ipcontroller.sh), you can run python scripts that use the ipyparallel Client
 interface, or use the ipython console for interactive investigations.
 To run the console type ``jupyter console``.  In either case, your code will get a client interface via::
