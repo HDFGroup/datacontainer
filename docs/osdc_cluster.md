@@ -63,6 +63,6 @@ parallel operations using the Client interface.
 
 # Shutdown the cluster
 
-From the Griffin console select the engine instances and click "Terminate Instances".
+From the [Griffin console](https://www.opensciencedatacloud.org/project/instances/) select the engine instances and click "Terminate Instances".
 On the controller terminal, control-C the `ipcontroller` command.  Store any output from your client
 in the object store. Then terminate the controller VM.
