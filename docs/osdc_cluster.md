@@ -77,5 +77,4 @@ If you still see some instances that have name 'ipengine-' running,
 visit the [Griffin console](https://www.opensciencedatacloud.org/project/instances/) page,
 select the engine instances,
 and click "Terminate Instances".
-On the controller terminal, control-C the `ipcontroller` command.  Store any output from your client
-in the object store. Then terminate the controller VM.
+On the controller instance (*ipcontroller*) terminal, kill the `ipcontroller` command by pressing 'Ctrl-C'.  Store any output from the controller instance into the object store. Then terminate the controller instance.
