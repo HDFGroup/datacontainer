@@ -68,6 +68,14 @@ parallel operations using the Client interface.
 
 # Shutdown the cluster
 
-From the [Griffin console](https://www.opensciencedatacloud.org/project/instances/) select the engine instances and click "Terminate Instances".
+Ssh to griffin.opensciencedatacloud.org. Then, issue the following command:
+```
+$nova delete $(nova list | cut -d " " -f 4 | grep ipengine | tr '\n' ' ')
+```
+
+If you still see some instances that have name 'ipengine-' running, 
+visit the [Griffin console](https://www.opensciencedatacloud.org/project/instances/) page,
+select the engine instances,
+and click "Terminate Instances".
 On the controller terminal, control-C the `ipcontroller` command.  Store any output from your client
 in the object store. Then terminate the controller VM.
