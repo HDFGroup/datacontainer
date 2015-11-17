@@ -9,20 +9,24 @@ import numpy
 import argparse
 from ipyparallel import Client
 
+
 file_names = []
 downloads = {}
 h5path = None
-s3cmd_batch_size=2
+s3cmd_batch_size = 2
 s3_prefix = "s3://"
+
 
 def summary(file_path, h5path):
 
     file_name = os.path.basename(file_path)
 
-    #print("Summary ", file_path, h5path)
+    # print("Summary ", file_path, h5path)
 
-    if not h5py.is_hdf5(file_path):
-        raise IOError("Not an HDF5 file: " + file_path)
+    if not os.path.exists(file_path):
+        raise IOError(platform.node() + ': File does not exist: ' + file_path)
+    elif not h5py.is_hdf5(file_path):
+        raise IOError(platform.node() + ": Not an HDF5 file: " + file_path)
     with h5py.File(file_path, 'r') as f:
         dset = f[h5path]
 
@@ -36,7 +40,8 @@ def summary(file_path, h5path):
         # file name GSSTF_NCEP.3.YYYY.MM.DD.he5
 
         return(file_name, len(v), numpy.min(v), numpy.max(v), numpy.mean(v),
-              numpy.median(v), numpy.std(v))
+               numpy.median(v), numpy.std(v))
+
 
 def startFileDownload():
     print("start file download")
@@ -63,7 +68,8 @@ def startFileDownload():
             else:
                 if subprocesses < s3cmd_batch_size:
                     # start a new download process
-                    p = subprocess.Popen(['s3cmd', 'get', s3_uri, local_filepath])
+                    p = subprocess.Popen(
+                        ['s3cmd', 'get', s3_uri, local_filepath])
                     download["subprocess"] = p
                     subprocesses += 1
                     download["state"] = "INPROGRESS"
@@ -77,6 +83,7 @@ def startFileDownload():
                 download["state"] = "FAILED"
         downloads[filename] = download
 
+
 def checkDownloadComplete():
     print("checkDownloadComplete()")
     in_process_count = 0
@@ -88,21 +95,22 @@ def checkDownloadComplete():
             p = download['subprocess']
             p.poll()
             if p.returncode is None:
-                done = False # still waiting on a download
+                done = False  # still waiting on a download
                 in_process_count += 1
             elif p.returncode < 0:
                 raise IOError("s3cmd failed for " + filename)
             else:
                 download["state"] = "COMPLETE"
         elif download["state"] == "PENDING":
-             queued_items.append(download)
-             done = False
+            queued_items.append(download)
+            done = False
 
     if len(queued_items) > 0:
         for download in queued_items:
             if in_process_count >= s3cmd_batch_size:
-                break # don't start any more subprocesses just yet
-            p = subprocess.Popen(['s3cmd', 'get', download["s3_uri"], download["local_filepath"]])
+                break  # don't start any more subprocesses just yet
+            p = subprocess.Popen(['s3cmd', 'get', download["s3_uri"],
+                                  download["local_filepath"]])
             download["subprocess"] = p
             download["state"] = "INPROGRESS"
             in_process_count += 1
@@ -110,6 +118,7 @@ def checkDownloadComplete():
     if done:
         print("download complete!")
     return done
+
 
 def processFiles():
     print("processFiles()")
@@ -120,7 +129,7 @@ def processFiles():
     for filename in filenames:
         download = downloads[filename]
         print(download)
-        output = summary(download["local_filepath"], h5path )
+        output = summary(download["local_filepath"], h5path)
         return_values.append(output)
     return return_values
 
@@ -140,7 +149,6 @@ def main():
     # example path (for above file):
     # /HDFEOS/GRIDS/NCEP/Data\ Fields/Psea_level
 
-
     args = parser.parse_args()
 
     if not args.filename and not args.input:
@@ -151,7 +159,6 @@ def main():
     global h5path
     h5path = args.path
 
-    files = []
     if args.input:
         with open(args.input) as f:
             for line in f:
@@ -162,7 +169,7 @@ def main():
     else:
         file_names.append(args.filename)
 
-    rc = None # client interface for cluster mode
+    rc = None  # client interface for cluster mode
     dview = None
 
     if args.cluster:
@@ -171,7 +178,7 @@ def main():
             sys.exit("No engines found")
         print(len(rc.ids), "engines")
         dview = rc[:]
-        dview.block = True # use sync
+        dview.block = True  # use sync
         # have engines import packages
         with dview.sync_imports():
             import sys
@@ -179,6 +186,7 @@ def main():
             import h5py
             import numpy
             import subprocess
+            import platform
         # send the summary method to engines
         dview.push(dict(summary=summary))
         # push the path name
@@ -208,17 +216,23 @@ def main():
 
         print("start processing")
         # run process_files on engines
+        start_time = time.time()
         output = dview.apply(processFiles)
+        end_time = time.time()
+        print('>>>>> runtime: ', end_time - start_time)
     else:
         startFileDownload()
         while not checkDownloadComplete():
             time.sleep(1)  # wait for downloads
 
-        output = processFiles() # just run locally
+        start_time = time.time()
+        output = processFiles()  # just run locally
+        end_time = time.time()
+        print('>>>>> runtime: ', end_time - start_time)
 
     for elem in output:
         if type(elem) is list:
-            #output from engines, break out each tuple
+            # output from engines, break out each tuple
             for item in elem:
                 print(item)
         else:
