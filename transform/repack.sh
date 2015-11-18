@@ -26,10 +26,13 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     # /home/ubuntu/bin/s3cmd put repacked/$name s3://hdfdata/ncep3_chunk_45_180_szip_8_NN/$name
 
     # Mafisc. It works only on joe_issue10 snapshot.
-   /home/ubuntu/anaconda/bin/h5repack -L -l CHUNK=45x180 --filter=UD=32002,1,\
-0  $name repacked/$name
-    /home/ubuntu/bin/s3cmd put repacked/$name s3://hdfdata/ncep3_chunk_45_180_\
-mafisc_32002_1_0/$name    
+    # /home/ubuntu/anaconda/bin/h5repack -L -l CHUNK=45x180 --filter=UD=32002,1,0  $name repacked/$name
+    # /home/ubuntu/bin/s3cmd put repacked/$name s3://hdfdata/ncep3_chunk_45_180_mafisc_32002_1_0/$name
+
+    # Blosc. It works only on joe_issue10 snapshot.
+    /home/ubuntu/anaconda/bin/h5repack -L -l CHUNK=45x180 -f UD=32001,2,2,4  $name repacked/$name
+    /home/ubuntu/bin/s3cmd put repacked/$name s3://hdfdata/ncep3_chunk_45_180_blosc_2_2_4/$name
+    
     rm -f repacked/$name
     rm -f $name
 done < "$1"
