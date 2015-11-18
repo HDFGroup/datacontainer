@@ -95,7 +95,7 @@ From Griffin you can access the nova cli to monitor, create, and remove VMs:
 
         $ nova image-list
 
-* List avilable machine types
+* List available machine types
 
         $ nova flavor-list
 
@@ -110,5 +110,9 @@ From Griffin you can access the nova cli to monitor, create, and remove VMs:
 * Delete all VMs with `{STRING}` in their name
 
         nova delete $(nova list | cut -d " " -f 4 | grep {STRING} | tr '\n' ' ')
+
+* List all VMs not in the running state
+
+        nova list | grep -v Running
 
 Full user guide is at: http://docs.openstack.org/cli-reference/content/.
