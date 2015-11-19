@@ -8,49 +8,58 @@ from datetime import datetime
 def init():
     s3 = S3Download()
     globals()['s3'] = s3
-    
+
+
 def freespace():
     # global s3
     s3 = globals()['s3']
     return s3.freespace
-    
+
+
 def usedspace():
     s3 = globals()['s3']
     return s3.usedspace
-    
-def clear(s3uri_prefix = None, remove_all=False):
+
+
+def clear(s3uri_prefix=None, remove_all=False):
     s3 = globals()['s3']
     s3.clear(s3uri_prefix=s3uri_prefix, remove_all=remove_all)
-    
+
+
 def s3cmdls(s3uri):
     s3 = globals()['s3']
     return s3.cmdls(s3uri)
-    
+
+
 def addFiles(s3uris):
     s3 = globals()['s3']
     s3.addFiles(s3uris)
-    
+
+
 def getFiles(state=None, s3uri_prefix=None):
     s3 = globals()['s3']
     return s3.getFiles(state=state)
 
+
 def update():
     s3 = globals()['s3']
     return s3.update()
-    
+
+
 def start():
     s3 = globals()['s3']
     return s3.start()
-    
+
+
 def dump():
     s3 = globals()['s3']
     return s3.dump()
-    
-"""
-Class definition
-"""
 
-class S3Download:
+
+class S3Download(object):
+    """
+    Class definition
+    """
 
     def __init__(self):
         self.home_dir = os.environ["HOME"]
@@ -81,9 +90,7 @@ class S3Download:
 
         self.log.info("s3_dir: " + self.s3_dir)
         self.init_downloads(self.s3_dir)
-        
-        
-                
+
     def init_downloads(self, pdir):
         """ Fill in downloads list with exsiting files
         """
@@ -92,13 +99,13 @@ class S3Download:
             path = os.path.join(pdir, name)
             if os.path.isdir(path):
                 # recursively call with subdir
-                self.init_downloads(path)  
+                self.init_downloads(path)
             else:
                 # add file
                 download = {}
                 fstat = os.stat(path)
                 ts = fstat.st_mtime
-                s3_uri = self.s3_prefix + path[(len(self.s3_dir)+1):] 
+                s3_uri = self.s3_prefix + path[(len(self.s3_dir)+1):]
                 download['s3_uri'] = s3_uri
                 download['s3_date'] = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
                 download['s3_time'] = datetime.fromtimestamp(ts).strftime("%H:%M")
@@ -106,7 +113,6 @@ class S3Download:
                 download['state'] = 'COMPLETE'
                 download["local_filepath"] = path
                 self.downloads[s3_uri] = download
-        
 
     @property
     def freespace(self):
@@ -143,7 +149,7 @@ class S3Download:
         # sanity check, so we don't got erasing files outside the s3_dir...
         if not pdir.startswith(self.s3_dir):
             raise IOError("Invalid path: " + pdir)
-            
+
         contents = os.listdir(pdir)
         for name in contents:
             path = os.path.join(pdir, name)
@@ -153,13 +159,12 @@ class S3Download:
             else:
                 # remove a file
                 os.remove(path)
-    
 
-    def clear(self, s3uri_prefix = None, remove_all=False):
+    def clear(self, s3uri_prefix=None, remove_all=False):
         """ Remove files from s3 download directory, clears download queue
         """
         self.log.info("clear")
-        
+
         keys = list(self.downloads.keys())
         keys.sort()
         for s3uri in keys:
@@ -173,8 +178,7 @@ class S3Download:
         self.downloads.clear()
         if remove_all:
             # delete directories
-             self.rmrf(self.s3_dir) 
-            
+            self.rmrf(self.s3_dir)
 
     def cmdls(self, s3uri):
         """ List s3 objects
@@ -202,17 +206,17 @@ class S3Download:
                     continue
                 if len(fields) != 4:
                     raise IOError("Unexpected output from s3cmd: " + line)
-                s3ls_output = {'date': fields[0], 'time': fields[1], 'size': int(fields[2]), 'uri': fields[3]}
+                s3ls_output = {'date': fields[0], 'time': fields[1],
+                               'size': int(fields[2]), 'uri': fields[3]}
                 s3ls.append(s3ls_output)
         self.log.info("cmdls returning")
         return s3ls
-        
+
     def getFiles(self, state=None, s3uri_prefix=None):
         """Get list of files in the download queue.
            if state is provided, returns list of files in given state:
                PENDING|INPROGRESS|COMPLETE|FAILED
         """
-            
         downloads = []
         keys = list(self.downloads.keys())
         keys.sort()
@@ -220,16 +224,14 @@ class S3Download:
             download = self.downloads[key]
             if not state or (state and download['state'] == state):
                 s3uri = download['s3_uri']
-                if s3uri_prefix is None or s3uri.startswith(s3uri_prefix):               
+                if s3uri_prefix is None or s3uri.startswith(s3uri_prefix):
                     item = {}
-                    for k in ('local_filepath', 'size', 'state', 's3_time', 's3_date', 's3_uri'):
+                    for k in ('local_filepath', 'size', 'state', 's3_time',
+                              's3_date', 's3_uri'):
                         item[k] = download[k]
                     downloads.append(item)
-                    
-                
+
         return downloads
-        
-     
 
     def addFiles(self, s3uris):
         """add objects to download list.
@@ -253,8 +255,7 @@ class S3Download:
                 if s3_item in self.downloads:
                     self.log.info(s3_item + " already added")
                     continue
-                 
-                 
+
                 s3_path = s3_item[len(self.s3_prefix):]
                 self.log.info("s3_path:" + s3_path)
                 local_filepath = os.path.join(self.s3_dir, s3_path)
@@ -279,7 +280,6 @@ class S3Download:
         :return int number of pending/inprogress downloads
         """
         self.log.info("update")
-    
 
         keys = list(self.downloads.keys())
         keys.sort()
