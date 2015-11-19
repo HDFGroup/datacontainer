@@ -72,7 +72,7 @@ Usage page is here, http://s3tools.org/usage, but some common examples are:
         $ s3cmd ls
 
 * List items in `hdfdata` bucket
-*
+
         $ s3cmd ls s3://hdfdata/
 
 * Download a file from the object store
@@ -82,6 +82,21 @@ Usage page is here, http://s3tools.org/usage, but some common examples are:
 * Copy file `foo` to `hdftest` bucket
 
         $ s3cmd put foo s3://hdftest
+
+* Calculate the total of used S3 storage
+
+    ```sh
+    # Result is bytes
+    $ s3cmd du s3://hdfdata/
+
+    # Result is in human-friendly byte units (typically gigabytes)
+    $ s3cmd du -H s3://hdfdata/  
+
+    # Result is in bytes
+    $ s3cmd ls --recursive s3://hdfdata/ | awk '{print $3}' | python -c"import sys; print(sum(map(int, sys.stdin)))" –
+    ```
+
+    Of course, none of the above commands give the same result.
 
 # Nova Client
 
