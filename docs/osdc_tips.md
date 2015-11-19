@@ -86,14 +86,11 @@ Usage page is here, http://s3tools.org/usage, but some common examples are:
 * Calculate the total of used S3 storage
 
     * Result is in bytes
-
     ```sh
-    # Result is bytes
     $ s3cmd du s3://hdfdata/
     ```
     
     * Result is in human-friendly byte units (typically gigabytes)
-
     ```sh
     $ s3cmd du -H s3://hdfdata/  
     ```
