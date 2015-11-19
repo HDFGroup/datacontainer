@@ -1,6 +1,6 @@
 #!/bin/sh
-# construct list of s3 uri's to run
-s3cmd ls s3://hdfdata/ncep3/ | grep -v xml | grep he5 | rev | cut -d: -f1 | rev | sed -e 's/^/s3:/' > ncep_files.txt
+#
+cd ../util
+python s3pd.py get s3://hdfdata/ncep3/   
 cd ../filters/
-python summary.py -c whatever --input ../jobs/ncep_files.txt --path /HDFEOS/GRIDS/NCEP/Data\ Fields/Tair_2m
-rm ../jobs/ncep_files.txt
+python summary.py --file s3://hdfdata/ncep3 --path /HDFEOS/GRIDS/NCEP/Data\ Fields/Tair_2m
