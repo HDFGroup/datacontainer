@@ -21,28 +21,21 @@ nspace = s3download.freespace
 print("free space:", nspace)
 #usedspace = s3download.usedspace
 #print("used space", usedspace)
-"""
+
 print("clearing..")
 s3download.clear()
 usedspace = s3download.usedspace
 print("used space", usedspace)
 
-#s3download.addFiles(ncep3_files)
+s3download.addFiles(ncep3_files)
 s3download.addFiles("s3://hdfdata/ncep3/")
 output = s3download.dump()
 
-#output = s3download.s3cmdls("s3://hdfdata/ncep3/")
+s3download.addFiles(ncep3_files)
+
+output = s3download.cmdls("s3://hdfdata/ncep3/")
 print(output)
-"""
-"""
-s3download.addFiles("s3://hdfdata/ncep3/")
-count = s3download.start()
-while count > 0:
-    count = s3download.update()
-    #print(s3download.dump())
-    time.sleep(1)
-print("done!")
-"""
+
 
 
 

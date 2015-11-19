@@ -41,12 +41,14 @@ def processFiles(s3uri, h5path):
     
     from s3downloader import S3Download
     s3 = S3Download()
-    s3.addFiles(s3uri)
-    keys = list(s3.downloads)
-    keys.sort()
-    
-    for s3uri in keys:
-        download = s3.downloads[s3uri]
+     
+    downloads = s3.getFiles(s3uri_prefix=s3uri)
+    if len(downloads) == 0:
+        raise IOError("No downloads found")
+        
+    for download in downloads:
+        if download['state'] != 'COMPLETE':
+            raise IOError(s3uri + " in invalid state: " + download['state'])
         print(download)
         output = summary(download["local_filepath"], h5path)
         return_values.append(output)
@@ -66,6 +68,8 @@ def main():
 
     # example path (for above file):
     # /HDFEOS/GRIDS/NCEP/Data\ Fields/Psea_level
+    # or 
+    # /HDFEOS/GRIDS/NCEP/Data\ Fields/Tair_2m
     
     file_names = []
 
@@ -86,25 +90,14 @@ def main():
     rc = Client()
     if len(rc.ids) == 0:
         sys.exit("No engines found")
-    print(len(rc.ids), "engines")     
-        
-    from s3downloader import S3ParallelDownload
- 
-    s3p = S3ParallelDownload(rc) 
-        
-    s3p.loadFiles(s3uri)
-
-    files = s3p.getFiles()
+    print(len(rc.ids), "engines")    
     
-    print("files:")
-    for filename in files:
-        print(filename)
-              
+    dview = rc[:] 
+     
     print("start processing")
         
     # run process_files on engines
     start_time = time.time()
-    dview = s3p.dview # rc[:]
     
     with dview.sync_imports():
             import sys
@@ -118,17 +111,26 @@ def main():
     
     output = dview.apply_sync(processFiles, s3uri, h5path)
     end_time = time.time()
-    print('>>>>> runtime: ', end_time - start_time)
+    print(">>>>> runtime: {0:6.3f}s".format(end_time - start_time))
      
+    # sort the output by first field (filename) 
+    output_dict = {} 
     for elem in output:
-        print(elem)
-        continue
         if type(elem) is list:
             # output from engines, break out each tuple
             for item in elem:
-                print(item)
+                k = item[0]
+                if k not in output_dict:
+                    output_dict[k] = item
         else:
-            print(elem)
+            k = item[0]
+            if k not in output_dict:
+                output_dict[k] = item
+                    
+    keys = list(output_dict.keys())
+    keys.sort()
+    for k in keys:
+        print(output_dict[k])
    
 
 main()

@@ -31,7 +31,7 @@ print("files:")
 for filepath in files:
     print(filepath)
 
-pring("done")
+print("done")
 
 
 

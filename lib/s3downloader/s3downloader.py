@@ -1,9 +1,9 @@
-import sys
 import subprocess
 import os
-import time
 import logging
 import shutil
+from datetime import datetime
+
 
 def init():
     s3 = S3Download()
@@ -11,30 +11,39 @@ def init():
     
 def freespace():
     # global s3
+    s3 = globals()['s3']
     return s3.freespace
     
 def usedspace():
+    s3 = globals()['s3']
     return s3.usedspace
     
-def clear(remove_all=False):
-    s3.clear()
+def clear(s3uri_prefix = None, remove_all=False):
+    s3 = globals()['s3']
+    s3.clear(s3uri_prefix=s3uri_prefix, remove_all=remove_all)
     
 def s3cmdls(s3uri):
+    s3 = globals()['s3']
     return s3.cmdls(s3uri)
     
 def addFiles(s3uris):
+    s3 = globals()['s3']
     s3.addFiles(s3uris)
     
-def getFiles(state=None):
+def getFiles(state=None, s3uri_prefix=None):
+    s3 = globals()['s3']
     return s3.getFiles(state=state)
 
 def update():
+    s3 = globals()['s3']
     return s3.update()
     
 def start():
+    s3 = globals()['s3']
     return s3.start()
     
 def dump():
+    s3 = globals()['s3']
     return s3.dump()
     
 """
@@ -53,7 +62,12 @@ class S3Download:
         self.downloads = {}
 
         self.s3_prefix = "s3://"
-        self.s3cmd_batch_size = 2
+        try:
+            batch_size_env = os.environ["S3_CMD_BATCH_SIZE"]
+            self.s3cmd_batch_size = int(batch_size_env)
+        except KeyError:
+            # default to 4
+            self.s3cmd_batch_size = 4
 
         # Hardcode the destination for downloaded files
         self.s3_dir = os.environ["S3_CACHE_DIR"]
@@ -66,6 +80,33 @@ class S3Download:
                 ['sudo', 'chown', '-R', 'ubuntu:ubuntu', self.s3_dir])
 
         self.log.info("s3_dir: " + self.s3_dir)
+        self.init_downloads(self.s3_dir)
+        
+        
+                
+    def init_downloads(self, pdir):
+        """ Fill in downloads list with exsiting files
+        """
+        contents = os.listdir(pdir)
+        for name in contents:
+            path = os.path.join(pdir, name)
+            if os.path.isdir(path):
+                # recursively call with subdir
+                self.init_downloads(path)  
+            else:
+                # add file
+                download = {}
+                fstat = os.stat(path)
+                ts = fstat.st_mtime
+                s3_uri = self.s3_prefix + path[(len(self.s3_dir)+1):] 
+                download['s3_uri'] = s3_uri
+                download['s3_date'] = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+                download['s3_time'] = datetime.fromtimestamp(ts).strftime("%H:%M")
+                download['size'] = fstat.st_size
+                download['state'] = 'COMPLETE'
+                download["local_filepath"] = path
+                self.downloads[s3_uri] = download
+        
 
     @property
     def freespace(self):
@@ -80,7 +121,13 @@ class S3Download:
     def usedspace(self):
         """Get the number of bytes used in the s3 download directory.
         """
-        return shutil.disk_usage(self.s3_dir).used
+        nbytes = 0
+        keys = list(self.downloads.keys())
+        keys.sort()
+        for key in keys:
+            download = self.downloads[key]
+            nbytes += download['size']
+        return nbytes
 
     def rmrf(self, pdir):
         """ Remove all files in the given directory.
@@ -108,12 +155,18 @@ class S3Download:
                 os.remove(path)
     
 
-    def clear(self, remove_all=False):
+    def clear(self, s3uri_prefix = None, remove_all=False):
         """ Remove files from s3 download directory, clears download queue
         """
         self.log.info("clear")
         
-        for download in self.downloads:
+        keys = list(self.downloads.keys())
+        keys.sort()
+        for s3uri in keys:
+            if s3uri_prefix is not None:
+                if not s3uri.startswith(s3uri_prefix):
+                    continue
+            download = self.downloads[s3uri]
             filepath = download['local_filepath']
             if os.path.isfile(filepath):
                 os.remove(filepath)
@@ -160,16 +213,21 @@ class S3Download:
                PENDING|INPROGRESS|COMPLETE|FAILED
         """
             
-        s3_uris = []
+        downloads = []
         keys = list(self.downloads.keys())
         keys.sort()
         for key in keys:
             download = self.downloads[key]
             if not state or (state and download['state'] == state):
-                print(download)
-                s3_uris.append(download['s3_uri'])
+                s3uri = download['s3_uri']
+                if s3uri_prefix is None or s3uri.startswith(s3uri_prefix):               
+                    item = {}
+                    for k in ('local_filepath', 'size', 'state', 's3_time', 's3_date', 's3_uri'):
+                        item[k] = download[k]
+                    downloads.append(item)
+                    
                 
-        return s3_uris
+        return downloads
         
      
 
@@ -244,7 +302,7 @@ class S3Download:
                 p.poll()
                 if p.returncode is None:
                     inprocess_count += 1  # still waiting on a download
-                elif p.returncode < 0:
+                elif p.returncode != 0:
                     self.log.error("s3cmd failed for " + s3_uri)
                     download['subprocess'] = None
                     download["state"] = "FAILED"

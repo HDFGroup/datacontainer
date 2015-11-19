@@ -29,12 +29,11 @@ class S3ParallelDownload:
     def usedspace(self):
         return self.dview.apply_sync(s3downloader.usedspace)
     
-    def clear(self, remove_all=False):
-        return self.dview.apply_sync(s3downloader.clear, remove_all)
-         
-    
-    def getFiles(self):
-        return self.dview.apply_sync(s3downloader.getFiles)
+    def clear(self, s3uri_prefix=None, remove_all=False):
+        return self.dview.apply_sync(s3downloader.clear, s3uri_prefix=s3uri_prefix, remove_all=remove_all)
+           
+    def getFiles(self, state=None, s3uri_prefix=None):
+        return self.dview.apply_sync(s3downloader.getFiles, state=state, s3uri_prefix=s3uri_prefix)
     
     def loadFiles(self, s3uris):
         # first get the s3 list serially
