@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import logging
+from fnmatch import fnmatch
 
 # from s3downloader import S3Download
 import s3downloader
@@ -33,18 +34,18 @@ class S3ParallelDownload(object):
             raise IOError("No egnines running")
         return self.dview.apply_sync(s3downloader.usedspace)
 
-    def clear(self, s3uri_prefix=None, remove_all=False):
+    def clear(self, s3uri=None, remove_all=False):
         if len(self.rc) == 0:
             raise IOError("No egnines running")
         return self.dview.apply_sync(s3downloader.clear,
-                                     s3uri_prefix=s3uri_prefix,
+                                     s3uri_prefix=s3uri,
                                      remove_all=remove_all)
 
-    def getFiles(self, state=None, s3uri_prefix=None):
+    def getFiles(self, state=None, s3uri=None):
         if len(self.rc) == 0:
             raise IOError("No egnines running")
         return self.dview.apply_sync(s3downloader.getFiles,
-                                     state=state, s3uri_prefix=s3uri_prefix)
+                                     state=state, s3uri_prefix=s3uri)
 
     def loadFiles(self, s3uris):
         print("loadFiles")
@@ -52,22 +53,53 @@ class S3ParallelDownload(object):
             raise IOError("No egnines running")
         if type(s3uris) is not str or not s3uris.startswith("s3://"):
             raise IOError("Invalid argument to laodFiles")
+            
+        pattern = None
+        
+        if s3uris.endswith('/') or s3uris.rfind('*') == -1:
+            # no wild card - just get all objects with this prefix
+            s3uri_prefix = s3uris
+        else:
+            index = s3uris.rfind('/')
+            if index == 4:
+                raise IOError("Must provide a bucket name")
+            s3uri_prefix = s3uris[:(index+1)]
+            pattern = s3uris[(index+1):]
+            print("Using pattern:", pattern)
+            
         
         print("getting list of uri's to download")    
         # first get the s3 list serially
-        downloads = self.s3.cmdls(s3uris)
+        ls_out = self.s3.cmdls(s3uri_prefix)
 
-        if len(downloads) == 0:
+        if len(ls_out) == 0:
             raise IOError("Nothing to download!")
          
         print("checking storage spaace across machines") 
         # do a rough check to see if there is enough space on the 
         # machines to do the downoad.    
-        total_bytes = 0
+        total_bytes = 0    
+        downloads = []
         
-        for download in downloads:
-            total_bytes += download['size']
+        for item in ls_out:
+            
+            if pattern is not None:
+                # filter out any uri's that don't match the pattern
+                uri = item['uri']
+                index = uri.rfind('/')
+                name = uri[(index+1):]
+                print("fnmatch", name, pattern)
+                if fnmatch(name, pattern) is False:
+                    print("no match")
+                    continue  # doesn't match
+                print("match")
+             
+            total_bytes += item['size']
+            downloads.append(item)
                 
+        if len(downloads) == 0:
+            raise IOError("Nothing matching filter, no download")
+            
         num_engines = len(self.rc.ids)
         
         # manually divy up the files to the set of engines
@@ -93,6 +125,8 @@ class S3ParallelDownload(object):
         async_results = []
         for engine_id in range(num_engines):
             engine_view = self.rc[engine_id]
+            if engine_id not in uri_map:
+                continue  # nothing for this guy to do
             url_list = uri_map[engine_id]
             print("dispatching download list to engine:", engine_id)
             print("url_list", url_list)

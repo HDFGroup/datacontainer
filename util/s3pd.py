@@ -112,7 +112,7 @@ def main():
     if cmd == "get":
         used_old = s3p.usedspace()
         s3p.loadFiles(s3_uri)  
-        responses = s3p.getFiles(s3uri_prefix=s3_uri)
+        responses = s3p.getFiles(s3uri=s3_uri)
         printResponse(responses)
         used_new = s3p.usedspace()
         for n in range(len(used_old)):
@@ -121,7 +121,7 @@ def main():
             
     elif cmd == "ls":
         print("ls cmd")
-        responses = s3p.getFiles(state='COMPLETE', s3uri_prefix=s3_uri)    
+        responses = s3p.getFiles(state='COMPLETE', s3uri=s3_uri)    
         printResponse(responses)
         
     elif cmd == "du":
@@ -144,7 +144,7 @@ def main():
     elif cmd == "rm":
         print("rm cmd")
         used_old  = s3p.usedspace()
-        s3p.clear(s3uri_prefix=s3_uri)
+        s3p.clear(s3uri=s3_uri)
         used_new = s3p.usedspace()
         bytes_freed = 0
         for n in range(len(used_old)):
