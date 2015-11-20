@@ -1,3 +1,4 @@
-Date       Time    Filter  	   Dataset 	 Compression	Chunking	Platform	Machine	   Nodes  	Runtime(s3)	Runtime(filter)	Output
+Date       Time    Filter  	   Dataset 	 Compression	Chunking	Platform	Machine	   Nodes  	Runtime(s3) 	Runtime(filter)	Output
 2015-11-03 07:14   Summary.py	NCEP3	 None	        None	    OSDC        m3.xlarge  1        >2h         11m48s          s3://hdftest/ncep_summary_out_m3.xlarge.txt
 2015-11-16 06:59   Summary.py   NCEP3    None           None        OSDC        m1.small   50       >?           0m7s           s3://hdftest/ncep_summary_out_m1_c50.txt
+2015-11-20 06:59   Summary.py   NCEP3    None           None        OSDC        m1.small   100      >?           0m3s           s3://hdftest/ncep_summary_out_m1_c100.txt
