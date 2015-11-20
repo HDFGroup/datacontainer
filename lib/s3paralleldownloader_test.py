@@ -11,7 +11,7 @@ from s3paralleldownloader import S3ParallelDownload
  
 #main
 
-ncep_url = "S3://hdfdata/ncep3/"
+ncep_url = "s3://hdfdata/ncep3/"
 
 rc = Client()
 

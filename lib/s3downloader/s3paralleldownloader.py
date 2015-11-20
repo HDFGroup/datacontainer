@@ -47,8 +47,11 @@ class S3ParallelDownload(object):
                                      state=state, s3uri_prefix=s3uri_prefix)
 
     def loadFiles(self, s3uris):
+        print("loadFiles")
         if len(self.rc) == 0:
             raise IOError("No egnines running")
+        if type(s3uris) is not str or not s3uris.startswith("s3://"):
+            raise IOError("Invalid argument to laodFiles")
         
         print("getting list of uri's to download")    
         # first get the s3 list serially
@@ -92,6 +95,7 @@ class S3ParallelDownload(object):
             engine_view = self.rc[engine_id]
             url_list = uri_map[engine_id]
             print("dispatching download list to engine:", engine_id)
+            print("url_list", url_list)
             async_result = engine_view.apply_async(s3downloader.addFiles,
                                                    url_list)
 

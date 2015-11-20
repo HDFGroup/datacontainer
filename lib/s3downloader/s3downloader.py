@@ -88,12 +88,12 @@ class S3Download(object):
             subprocess.check_call(
                 ['sudo', 'chown', '-R', 'ubuntu:ubuntu', self.s3_dir])
 
-        self.log.info("s3_dir: " + self.s3_dir)
         self.init_downloads(self.s3_dir)
 
     def init_downloads(self, pdir):
         """ Fill in downloads list with exsiting files
         """
+        self.log.info("init_downloads(" + pdir + ")")
         contents = os.listdir(pdir)
         for name in contents:
             path = os.path.join(pdir, name)
@@ -103,16 +103,15 @@ class S3Download(object):
             else:
                 # add file
                 download = {}
-                fstat = os.stat(path)
-                ts = fstat.st_mtime
                 s3_uri = self.s3_prefix + path[(len(self.s3_dir)+1):]
                 download['s3_uri'] = s3_uri
-                download['s3_date'] = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
-                download['s3_time'] = datetime.fromtimestamp(ts).strftime("%H:%M")
-                download['size'] = fstat.st_size
                 download['state'] = 'COMPLETE'
                 download["local_filepath"] = path
                 self.downloads[s3_uri] = download
+                self.update_download(s3_uri) # update file properties
+                
+                
+                
 
     @property
     def freespace(self):
@@ -127,13 +126,35 @@ class S3Download(object):
     def usedspace(self):
         """Get the number of bytes used in the s3 download directory.
         """
+        self.log.info("freespace")
         nbytes = 0
         keys = list(self.downloads.keys())
         keys.sort()
         for key in keys:
             download = self.downloads[key]
             nbytes += download['size']
+        self.log.info("returning:" + str(nbytes))
         return nbytes
+        
+    def update_download(self, s3uri):
+        """ Update download info based on state of already downloaded
+        file.
+        """
+        if s3uri not in self.downloads:
+            self.log.error("Expected s3uri to be in downloads")
+            return
+        download = self.downloads[s3uri]
+        if download['state'] != 'COMPLETE':
+            return  # not downloaded yet
+        path = download['local_filepath']
+        fstat = os.stat(path)
+        ts = fstat.st_mtime
+        if 's3_date' not in download or not download['s3_date']:
+            download['s3_date'] = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+        if 's3_time' not in download or not download['s3_time']:
+            download['s3_time'] = datetime.fromtimestamp(ts).strftime("%H:%M")
+        if 'size' not in download or not download['size']:
+            download['size'] = fstat.st_size
 
     def rmrf(self, pdir):
         """ Remove all files in the given directory.
@@ -217,12 +238,14 @@ class S3Download(object):
            if state is provided, returns list of files in given state:
                PENDING|INPROGRESS|COMPLETE|FAILED
         """
+        self.log.info("getFiles")
         downloads = []
         keys = list(self.downloads.keys())
         keys.sort()
         for key in keys:
             download = self.downloads[key]
             if not state or (state and download['state'] == state):
+                print(download)
                 s3uri = download['s3_uri']
                 if s3uri_prefix is None or s3uri.startswith(s3uri_prefix):
                     item = {}
@@ -238,42 +261,55 @@ class S3Download(object):
 
         :arg list s3uris: can be folder path, or list of object uri's
         """
+        self.log.info("addFiles...")
         if type(s3uris) is str:
-            # convert to one element list
-            s3uris = [s3uris]
+           
+            if s3uris.endswith('/'):
+                # expand into list of uri's
+                s3uri = s3uris
+                s3uris = []
+                s3ls_out = self.cmdls(s3uri)
+                if len(s3ls_out) == 0:
+                    raise IOError("no s3 objects found for " + s3_uri)
+                for output in s3ls_out:
+                    s3_item = output['uri']
+                   
+                    self.log.info("got item: " + s3_item)
+                    if s3_item in self.downloads:
+                        self.log.info(s3_item + " already added")
+                        continue
+                    s3uris.append(s3_item)
+            else:
+                # just convert to one element list
+                s3uris = [s3uris]
+                
+        if len(s3uris) == 0:
+            self.log.info("nothing to download")
+            return
 
         for s3_uri in s3uris:
             self.log.info("addFiles: " + s3_uri)
             if not s3_uri.startswith(self.s3_prefix):
                 raise IOError("Invalid s3 uri: %s" % s3_uri)
-            s3ls_out = self.cmdls(s3_uri)
-            if len(s3ls_out) == 0:
-                raise IOError("no s3 objects found for " + s3_uri)
-            for output in s3ls_out:
-                s3_item = output['uri']
-                self.log.info("got item: " + s3_item)
-                if s3_item in self.downloads:
-                    self.log.info(s3_item + " already added")
-                    continue
+            s3_path = s3_uri[len(self.s3_prefix):]
+            self.log.info("s3_path:" + s3_path)
+            local_filepath = os.path.join(self.s3_dir, s3_path)
 
-                s3_path = s3_item[len(self.s3_prefix):]
-                self.log.info("s3_path:" + s3_path)
-                local_filepath = os.path.join(self.s3_dir, s3_path)
+            download = {}
+            download['s3_uri'] = s3_uri
+            download['s3_date'] = ''
+            download['s3_time'] = ''
+            download['size'] = 0
+            download["local_filepath"] = local_filepath
 
-                download = {}
-                download['s3_uri'] = s3_item
-                download['s3_date'] = output['date']
-                download['s3_time'] = output['time']
-                download['size'] = output['size']
-                download["local_filepath"] = local_filepath
+            if os.path.exists(local_filepath):
+                # todo, check that the s3 object is the same as local copy
+                download["state"] = 'COMPLETE'
+                self.update_download(s3_uri)
+            else:
+                download['state'] = 'PENDING'
 
-                if os.path.exists(local_filepath):
-                    # todo, check that the s3 object is the same as local copy
-                    download["state"] = 'COMPLETE'
-                else:
-                    download['state'] = 'PENDING'
-
-                self.downloads[s3_item] = download
+            self.downloads[s3_uri] = download
 
     def update(self):
         """check status of downloads and start more subprocesses as needed.
@@ -289,7 +325,7 @@ class S3Download(object):
         inprocess_count = 0
 
         for s3_uri in keys:
-            print(s3_uri)
+            self.log.info("s3_uri: " + s3_uri)
             download = self.downloads[s3_uri]
 
             print(download)
@@ -312,6 +348,7 @@ class S3Download(object):
                     download['subprocess'] = None
                     download["state"] = 'COMPLETE'
                     download["rc"] = 0
+                    self.update_download(s3_uri)  # get file states
             elif state == 'PENDING':
                 self.log.info("pending")
                 if inprocess_count < self.s3cmd_batch_size:
@@ -330,6 +367,7 @@ class S3Download(object):
     def downloadsize(self):
         """Get the number of bytes to be downloaded.
         """
+        self.log.info("downloadsize")
         keys = list(self.downloads.keys())
         keys.sort()
 
@@ -347,7 +385,11 @@ class S3Download(object):
         """Start download.  Return exception if the amount of freespace is
         not sufficient to store objects in download queue.
         """
+        self.log.info("start")
         # verify that we have enough free space for the download
+        # may not be accurate since we likely have not fetched the
+        # the size of the objects to be downloaded.
+        # But s3parallel should check for us prior to sending the request.
         freespace = self.freespace
         download_size = self.downloadsize()
         if download_size > freespace:
@@ -362,6 +404,7 @@ class S3Download(object):
     def dump(self):
         """ Return state of download queue.
         """
+        self.log.info("dump")
         output = []
         s3_uris = list(self.downloads.keys())
         s3_uris.sort()
