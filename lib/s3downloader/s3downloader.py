@@ -352,7 +352,7 @@ class S3Download(object):
         download_size = self.downloadsize()
         if download_size > freespace:
             msg = "not enough free space to download: " + str(download_size)
-            msg += ", " + str(freespace) + " available"
+            msg += " bytes, " + str(freespace) + " available"
             self.log.info(msg)
             raise IOError(msg)
 

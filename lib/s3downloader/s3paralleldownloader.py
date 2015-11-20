@@ -24,31 +24,59 @@ class S3ParallelDownload(object):
         self.dview.apply_sync(s3downloader.init)
 
     def freespace(self):
+        if len(self.rc) == 0:
+            raise IOError("No egnines running")
         return self.dview.apply_sync(s3downloader.freespace)
 
     def usedspace(self):
+        if len(self.rc) == 0:
+            raise IOError("No egnines running")
         return self.dview.apply_sync(s3downloader.usedspace)
 
     def clear(self, s3uri_prefix=None, remove_all=False):
+        if len(self.rc) == 0:
+            raise IOError("No egnines running")
         return self.dview.apply_sync(s3downloader.clear,
                                      s3uri_prefix=s3uri_prefix,
                                      remove_all=remove_all)
 
     def getFiles(self, state=None, s3uri_prefix=None):
+        if len(self.rc) == 0:
+            raise IOError("No egnines running")
         return self.dview.apply_sync(s3downloader.getFiles,
                                      state=state, s3uri_prefix=s3uri_prefix)
 
     def loadFiles(self, s3uris):
+        if len(self.rc) == 0:
+            raise IOError("No egnines running")
+        
+        print("getting list of uri's to download")    
         # first get the s3 list serially
         downloads = self.s3.cmdls(s3uris)
 
         if len(downloads) == 0:
             raise IOError("Nothing to download!")
-
+         
+        print("checking storage spaace across machines") 
+        # do a rough check to see if there is enough space on the 
+        # machines to do the downoad.    
+        total_bytes = 0
+        
+        for download in downloads:
+            total_bytes += download['size']
+                
         num_engines = len(self.rc.ids)
+        
         # manually divy up the files to the set of engines
-        file_set_size = len(downloads)/num_engines   # PY 3 style float result
+        file_set_size = total_bytes/num_engines   # PY 3 style float result
+        
+        output = self.freespace()
+        for item in output:
+            if item < file_set_size:
+                raise IOError("Not enough space to download")
 
+        print("storage space should be sufficient")
+        
         uri_map = {}
         engine_num = 0
         for download in downloads:
@@ -63,6 +91,7 @@ class S3ParallelDownload(object):
         for engine_id in range(num_engines):
             engine_view = self.rc[engine_id]
             url_list = uri_map[engine_id]
+            print("dispatching download list to engine:", engine_id)
             async_result = engine_view.apply_async(s3downloader.addFiles,
                                                    url_list)
 
@@ -76,11 +105,16 @@ class S3ParallelDownload(object):
                     break
             if not ready:
                 time.sleep(1)
+                
+        print("starting download")
 
         counts = self.dview.apply_sync(s3downloader.start)
+        loop_number = 0
         while any(v > 0 for v in counts):
             time.sleep(1)
             counts = self.dview.apply_sync(s3downloader.update)
-            print("counts:", counts)
+            loop_number += 1
+            if (loop_number % 5) == 0:
+                print("counts:", counts)
 
         print("done!")
