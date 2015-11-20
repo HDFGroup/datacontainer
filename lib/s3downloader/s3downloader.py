@@ -232,7 +232,7 @@ class S3Download(object):
                 s3ls.append(s3ls_output)
         self.log.info("cmdls returning")
         return s3ls
-
+        
     def getFiles(self, state=None, s3uri_prefix=None):
         """Get list of files in the download queue.
            if state is provided, returns list of files in given state:
@@ -255,6 +255,28 @@ class S3Download(object):
                     downloads.append(item)
 
         return downloads
+
+    def files(self, state=None, s3uri_prefix=None):
+        """Generator for list of files in the download queue.
+           if state is provided, returns list of files in given state:
+               PENDING|INPROGRESS|COMPLETE|FAILED
+           Not supported for cluster operations (generator is not pickable)
+        """
+        self.log.info("files generator")
+        keys = list(self.downloads.keys())
+        keys.sort()
+        for key in keys:
+            download = self.downloads[key]
+            if not state or (state and download['state'] == state):
+                print(download)
+                s3uri = download['s3_uri']
+                if s3uri_prefix is None or s3uri.startswith(s3uri_prefix):
+                    item = {}
+                    for k in ('local_filepath', 'size', 'state', 's3_time',
+                              's3_date', 's3_uri'):
+                        item[k] = download[k]
+                    yield item
+                    
 
     def addFiles(self, s3uris):
         """add objects to download list.

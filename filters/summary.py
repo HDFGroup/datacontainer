@@ -10,50 +10,36 @@ import argparse
 from ipyparallel import Client
 
 
-def summary(file_path, h5path):
-    
-    file_name = os.path.basename(file_path)
-
-    # print("Summary ", file_path, h5path)
-
-    if not os.path.exists(file_path):
-        raise IOError(platform.node() + ': File does not exist: ' + file_path)
-    elif not h5py.is_hdf5(file_path):
-        raise IOError(platform.node() + ": Not an HDF5 file: " + file_path)
-    with h5py.File(file_path, 'r') as f:
-        dset = f[h5path]
-
-        # mask fill value
-        if '_FillValue' in dset.attrs:
-            arr = dset[...]
-            fill = dset.attrs['_FillValue'][0]
-            v = arr[arr != fill]
-        else:
-            v = dset[...]
-        # file name GSSTF_NCEP.3.YYYY.MM.DD.he5
-
-        return(file_name, len(v), numpy.min(v), numpy.max(v), numpy.mean(v),
-               numpy.median(v), numpy.std(v))
- 
-def processFiles(s3uri, h5path):
-    print("processFiles()")
-    return_values = []  
-    
+def summary(s3uri, h5path):
+    # import within the function so the engines will pick them up
+    import sys
+    import os
+    import h5py
+    import numpy
     from s3downloader import S3Download
+    
     s3 = S3Download()
-     
-    downloads = s3.getFiles(s3uri_prefix=s3uri)
-    if len(downloads) == 0:
-        raise IOError("No downloads found")
-        
-    for download in downloads:
-        if download['state'] != 'COMPLETE':
-            raise IOError(s3uri + " in invalid state: " + download['state'])
-        print(download)
-        output = summary(download["local_filepath"], h5path)
-        return_values.append(output)
-    return return_values
+    return_values = []
+    for download in s3.files(s3uri_prefix=s3uri):
+        file_path = download['local_filepath']   
+        file_name = os.path.basename(file_path)
 
+        with h5py.File(file_path, 'r') as f:
+            dset = f[h5path]
+
+            # mask fill value
+            if '_FillValue' in dset.attrs:
+                arr = dset[...]
+                fill = dset.attrs['_FillValue'][0]
+                v = arr[arr != fill]
+            else:
+                v = dset[...]
+            # file name GSSTF_NCEP.3.YYYY.MM.DD.he5
+
+            return_values.append( (file_name, len(v), numpy.min(v), numpy.max(v), numpy.mean(v),
+                numpy.median(v), numpy.std(v) ) )
+                
+    return return_values
 
 def main():
     parser = argparse.ArgumentParser()
@@ -97,19 +83,9 @@ def main():
     print("start processing")
         
     # run process_files on engines
-    start_time = time.time()
-    
-    with dview.sync_imports():
-            import sys
-            import os
-            import h5py
-            import numpy
-            import platform
-    
-    # push the summary method to the engines
-    dview.push(dict(summary=summary))
-    
-    output = dview.apply_sync(processFiles, s3uri, h5path)
+    start_time = time.time()       
+   
+    output = dview.apply_sync(summary, s3uri, h5path)
     end_time = time.time()
     print(">>>>> runtime: {0:6.3f}s".format(end_time - start_time))
      
