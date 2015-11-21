@@ -29,7 +29,7 @@ def printResponse(responses):
 #
     engine_no = 0
     for response in responses:
-        label = "engine #" + str(engine_no) + ':'
+        label = "engine #{0:4d}:".format(engine_no)
         if len(response) == 0:
             print(label, "<empty>")
         else:
@@ -132,7 +132,7 @@ def main():
             raise IOError("unexpected response")
         engine_no = 0
         for n in range(len(used_responses)):
-            label = "engine #" + str(engine_no) + ':'
+            label = "engine #{0:4d}:".format(engine_no)
             used = hrFormat(used_responses[n])
             free = hrFormat(free_responses[n])
             percent_used = used_responses[n] / (used_responses[n] + free_responses[n])
