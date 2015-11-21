@@ -111,7 +111,11 @@ def main():
     keys = list(output_dict.keys())
     keys.sort()
     for k in keys:
-        print(output_dict[k])
+        text = ""
+        values = output_dict[k]
+        for value in values:
+            text += str(value) + "   "
+        print(text)
    
 
 main()
