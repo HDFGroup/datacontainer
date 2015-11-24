@@ -2,4 +2,6 @@ Date       Time    Filter  	   Dataset 	 Compression	Chunking	Platform	Machine	 
 2015-11-03 07:14   Summary.py	NCEP3	 None	        None	    OSDC        m3.xlarge  1        >2h         11m48s          s3://hdftest/ncep_summary_out_m3.xlarge.txt
 2015-11-16 06:59   Summary.py   NCEP3    None           None        OSDC        m1.small   50       >?           0m7s           s3://hdftest/ncep_summary_out_m1_c50.txt
 2015-11-20 05:29   Summary.py   NCEP3    None           None        OSDC        m1.small   100      5m3s         0m3s           s3://hdftest/ncep_summary_out_m1_c100.txt
-2015-11-21 05:49   Summary.py   NCEP3    gzip_9         22x46       OSDC        m1.small   100      2m20s        0m8s           s3://hdftest/ncep_summary_out_m1_c100.txt
+2015-11-21 05:49   Summary.py   NCEP3    gzip_9         22x46       OSDC        m1.small   100      2m20s        0m8s           s3://hdftest/ncep_22_46_gzip_9_summary_out_m1_c100.txt
+2015-11-21 05:59   Series.py    NCEP3    gzip_9         22x46       OSDC        m1.small   100      2m20s        0m1.5s         s3://hdftest/ncep_22_46_gzip_9_series_out_m1_c100.txt
+2015-11-21 06:07   Summary.py   NCEP3    blosc          22x46       OSDC        m1.small   100      2m30s        0m1.5s         s3://hdftest/ncep_22_46_gzip_9_series_out_m1_c100.txt
