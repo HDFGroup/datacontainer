@@ -25,6 +25,9 @@ The profile name will be used to identify this
 cluster within the OSDC machine.  If profile name is not provided, "profile_default" will be used.
 Note: currently only the default profile is working with the engine script.
 
+If launching more than 20 engines, run this command with 20 at a time.  Wait for the engines to activate and 
+then repeat until the desired number of engines are launched.
+
 The `ipcontroller` script will output status messages as engines and clients connect to the controller.
 
 In a new terminal window, run the script
