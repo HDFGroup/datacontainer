@@ -15,7 +15,7 @@ fname_sig = 'GSSTF_NCEP.3.*.he5'
 concat_file = 'GSSTF_NCEP.3.concat.h5'
 
 # Let's find some files...
-files = glob.glob(os.path.join(path, os.sep, fname_sig))
+files = glob.glob(os.path.join(path, fname_sig))
 if len(files) == 0:
     print('No %s files found in %s' % (fname_sig, path))
     sys.exit()
@@ -42,6 +42,7 @@ big_f = h5py.File(concat_file, 'w')
 # Concatenate...
 first_file = True
 for fcount, fname in enumerate(files):
+    print('Processing', fname)
     f = h5py.File(fname, 'r')
 
     # If first_file is True, create new datasets that will hold concatenated
@@ -60,7 +61,7 @@ for fcount, fname in enumerate(files):
 
             # Copy all attributes from the original dataset...
             for a in orig_dset.attrs:
-                concat_dsets[p][a] = orig_dset.attrs[a]
+                concat_dsets[p].attrs[a] = orig_dset.attrs[a]
 
     for (p, dset) in concat_dsets.items():
         dset[fcount, :, :] = f[p][...]
