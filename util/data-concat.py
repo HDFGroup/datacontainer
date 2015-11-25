@@ -56,8 +56,9 @@ for fcount, fname in enumerate(files):
 
             # Create the dataset for concatenated data...
             new_shape = (concat_dimsize,) + orig_dset.shape
-            concat_dsets[p] = big_f.create_dataset(p, new_shape,
-                                                   dtype=orig_dset.dtype)
+            concat_dsets[p] = big_f.create_dataset(
+                p, new_shape, fillvalue=orig_dset.fillvalue,
+                dtype=orig_dset.dtype)
 
             # Copy all attributes from the original dataset...
             for a in orig_dset.attrs:
