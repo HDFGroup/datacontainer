@@ -24,7 +24,7 @@ if len(files) == 0:
 # correctly. Perhaps it will need to be checked and changed for each new case.)
 files = sorted(files)
 
-# Which HDF5 datasets to concatenate...
+# Which HDF5 datasets's data to concatenate...
 h5path = [
     '/HDFEOS/GRIDS/NCEP/Data Fields/Psea_level',
     '/HDFEOS/GRIDS/NCEP/Data Fields/Qsat',
@@ -40,15 +40,15 @@ concat_dimsize = len(files)
 big_f = h5py.File(concat_file, 'w')
 
 # Concatenate...
-first_file = True
+first_pass = True
 for fcount, fname in enumerate(files):
     print('Processing', fname)
     f = h5py.File(fname, 'r')
 
-    # If first_file is True, create new datasets that will hold concatenated
+    # If first_pass is True, create new datasets that will hold concatenated
     # data...
-    if first_file:
-        first_file = False
+    if first_pass:
+        first_pass = False
         concat_dsets = dict()
         for p in h5path:
             # Get some information from the dataset in the first file...
