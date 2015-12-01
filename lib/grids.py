@@ -110,7 +110,7 @@ class GsstfNcep:
     @property
     def time_res(self):
         """Grid temporal resolution."""
-        return timedelta(1)
+        return timedelta(days=1)
 
     @property
     def lat_max(self):
@@ -149,6 +149,11 @@ class GsstfNcep:
     def grid_size_lon(self):
         """Number of grid cells along the longitude axis."""
         return 1440
+
+    @property
+    def grid_size_time(self):
+        """Number of grid cells along the time axis."""
+        return 7850
 
 
 class GsstfDataPoint(GsstfNcep, DataPoint):
@@ -253,4 +258,83 @@ class DataRegion:
 
 class GsstfDataRegion(GsstfNcep, DataRegion):
     """Define a data region of the GSSTF NCEP data set."""
+    pass
+
+
+class Cortad:
+    """Describe the properties of the The Coral Reef Temperature Anomaly
+    Database (CoRTAD) Version 5.
+
+    http://data.nodc.noaa.gov/cgi-bin/iso?id=gov.noaa.nodc:0126774
+    """
+    # Data set's file name template (set to None because there are more than
+    # one file)...
+    _fname_template = None
+
+    @property
+    def lon_res(self):
+        """Grid longitude resolution in degrees."""
+        return 0.04165
+
+    @property
+    def lat_res(self):
+        """Grid latitude resolution in degrees."""
+        return 0.04165
+
+    @property
+    def time_res(self):
+        """Grid temporal resolution."""
+        return timedelta(weeks=1)
+
+    @property
+    def lat_max(self):
+        """Grid maximum (northernmost) latitude in degrees."""
+        return 89.9791717529297
+
+    @property
+    def lat_min(self):
+        """Grid minimum (southernmost) latitude in degrees."""
+        return -89.9791717529297
+
+    @property
+    def lon_max(self):
+        """Grid maximum (easternmost) longitude in degrees."""
+        return 179.979202270508
+
+    @property
+    def lon_min(self):
+        """Grid minimum (westernmost) longitude in degrees."""
+        return -179.979202270508
+
+    @property
+    def time_start(self):
+        return datetime(1982, 1, 2)
+
+    @property
+    def time_end(self):
+        return datetime(2012, 12, 29)
+
+    @property
+    def grid_size_lat(self):
+        """Number of grid cells along the latitude axis."""
+        return 4320
+
+    @property
+    def grid_size_lon(self):
+        """Number of grid cells along the longitude axis."""
+        return 8640
+
+    @property
+    def grid_size_time(self):
+        """Number of grid cells along the time axis."""
+        return 1617
+
+
+class CortadDataPoint(Cortad, DataPoint):
+    """A data point of the CoRTAD data set."""
+    pass
+
+
+class CortadDataRegion(Cortad, DataRegion):
+    """Describe CoRTAD data region."""
     pass
