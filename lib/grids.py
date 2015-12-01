@@ -82,6 +82,11 @@ class DataPoint:
         return self._fname_template.format(year=dt.year, month=dt.month,
                                            day=dt.day)
 
+    def __repr__(self):
+        return ('{:s}(lat={:f}, lon={:f}, time=\'{:s}\')'
+                .format(type(self).__name__, self.lat, self.lon,
+                        self.time.isoformat()))
+
 
 class GsstfNcep:
     """Describe the properties of the NCEP/DOE Reanalysis II,
@@ -235,6 +240,15 @@ class DataRegion:
                     lon += self.lon_res
                 lat += self.lat_res
             time += self.time_res
+
+    def __repr__(self):
+        dbbox = self.databbox
+        return ('<{:s}, {:d} data points, min lon={:f}, max lon={:f}, '
+                'min lat={:f}, max lat={:f}, begin time={:s}, end time={:s}>'
+                .format(type(self).__name__, len(self._dpoints),
+                        dbbox.min_lon, dbbox.max_lon, dbbox.min_lat,
+                        dbbox.max_lat, dbbox.begin.isoformat(),
+                        dbbox.end.isoformat()))
 
 
 class GsstfDataRegion(GsstfNcep, DataRegion):
