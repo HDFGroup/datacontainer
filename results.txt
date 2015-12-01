@@ -1,5 +1,17 @@
-Date       Time    Filter  	   Dataset 	 Compression	Chunking	Platform	Machine	   Nodes  	Runtime(s3) 	Runtime(filter)	Output
-2015-11-03 07:14   Summary.py	NCEP3	 None	        None	    OSDC        m3.xlarge  1        >2h         11m48s          s3://hdftest/ncep_summary_out_m3.xlarge.txt
-2015-11-16 06:59   Summary.py   NCEP3    None           None        OSDC        m1.small   50       >?           0m7s           s3://hdftest/ncep_summary_out_m1_c50.txt
-2015-11-20 05:29   Summary.py   NCEP3    None           None        OSDC        m1.small   100      5m3s         0m3s           s3://hdftest/ncep_summary_out_m1_c100.txt
-2015-11-21 05:49   Summary.py   NCEP3    gzip_9         22x46       OSDC        m1.small   100      2m20s        0m8s           s3://hdftest/ncep_summary_out_m1_c100.txt
+Date        Time    Filter      Dataset	 Size(GB)  Compression  Chunking   Platform    Machine      Nodes   Load_Time(s)    Run_Time(s)    Output
+11/03/15    7:14    Summary.py  NCEP3    122       None         None	   OSDC        m3.xlarge        1    3600.0           708.0        s3://hdftest/ncep_summary_out_m3.xlarge.txt	
+11/16/15    6:59    Summary.py  NCEP3    122       None         None       OSDC        m1.small        50     420.0             7.0        s3://hdftest/ncep_summary_out_m1_c50.txt	
+11/20/15    5:29    Summary.py  NCEP3    122       None         None       OSDC        m1.small       100     303.0             3.0        s3://hdftest/ncep_summary_out_m1_c100.txt	
+11/23/15    4:18    Series.py   NCEP3    122       None         None       OSDC        m1.small       100     310.0            68.0        s3://hdftest/ncep_series_out_m1_c100.txt	
+11/21/15    5:49    Summary.py  NCEP3     48       gzip_9       22x46      OSDC        m1.small       100     140.0             8.0        s3://hdftest/ncep_22_46_gzip_9_summary_out_m1_c100.txt	
+11/21/15    5:59    Series.py   NCEP3     48       gzip_9       22x46      OSDC        m1.small       100     140.0            65.0        s3://hdftest/ncep_22_46_gzip_9_series_out_m1_c100.txt	
+11/23/15    3:49    Summary.py  NCEP3     47       blosc        22x46      OSDC        m1.small       100     150.0           184.0        s3://hdftest/ncep3_chunk_45_180_blosc_2_2_4_summary_out_m1_c100.tx	
+11/23/15    3:59    Series.py   NCEP3     47       blosc        22x46      OSDC        m1.small       100     150.0            68.0        s3://hdftest/ncep3_chunk_45_180_blosc_2_2_4_summary_out_m1_c100.tx	
+11/23/15    4:29    Summary.py  NCEP3     50       gzip_9       45x180     OSDC        m1.small       100     142.0             5.5        s3://hdftest/ncep_chunk_45_180_gzip_9_summary_out_m1_c100.txt	
+11/23/15    4:35    Series.py   NCEP3     50       gzip_9       45x180     OSDC        m1.small       100     142.0             6.5        s3://hdftest/ncep_chunk_45_180_gzip_9_series_out_m1_c100.txt	
+11/23/15    4:44    Summary.py  NCEP3     17       mafisc       45x180     OSDC        m1.small       100     100.0            16.1        s3://hdftest/ncep_chunk_45_180_mafisc_summary_out_m1_c100.txt	
+11/23/15    4:51    Series.py   NCEP3     17       mafisc       45x180     OSDC        m1.small       100     100.0             6.9        s3://hdftest/ncep_chunk_45_180_mafisc_series_out_m1_c100.txt	
+11/23/15    6:35    Summary.py  NCEP3     50       gzip_9       22x46      OSDC        m1.small        25     317.0            24.3        s3://hdftest/ncep_22_46_gzip_9_summary_out_m1_c25.txt	
+11/23/15    5:59    Series.py   NCEP3     50       gzip_9       22x46      OSDC        m1.small        25     317.0             6.8        s3://hdftest/ncep_22_46_gzip_9_series_out_m1_c25.txt		
+11/23/15    4:07    Summary.py  NCEP3     47       blosc        22x46      OSDC        m1.small        25     333.0            14.2        s3://hdftest/ncep3_chunk_45_180_blosc_2_2_4_summary_out_m1_c25.tx	
+11/23/15    3:59    Series.py   NCEP3     47       blosc        22x46      OSDC        m1.small        25     333.0             1.4        s3://hdftest/ncep3_chunk_45_180_blosc_2_2_4_summary_out_m1_c25.tx	
