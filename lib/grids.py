@@ -248,12 +248,15 @@ class DataRegion:
 
     def __repr__(self):
         dbbox = self.databbox
-        return ('<{:s}, {:d} data points, min lon={:f}, max lon={:f}, '
-                'min lat={:f}, max lat={:f}, begin time={:s}, end time={:s}>'
-                .format(type(self).__name__, len(self._dpoints),
-                        dbbox.min_lon, dbbox.max_lon, dbbox.min_lat,
-                        dbbox.max_lat, dbbox.begin.isoformat(),
-                        dbbox.end.isoformat()))
+        ix = self.idxbbox
+        n = (ix.max_lon - ix.min_lon + 1) * (ix.max_lat - ix.min_lat + 1) * \
+            (ix.end - ix.begin + 1)
+        return ('<{:s}, {:d} data points, lon range={:f} degrees, '
+                'lat range={:f} degrees, time range={}>'
+                .format(type(self).__name__, n,
+                        dbbox.max_lon - dbbox.min_lon,
+                        dbbox.max_lat - dbbox.min_lat,
+                        dbbox.end - dbbox.begin))
 
 
 class GsstfDataRegion(GsstfNcep, DataRegion):
