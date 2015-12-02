@@ -78,9 +78,8 @@ class DataPoint:
     @property
     def filename(self):
         """Return the name of the file where the data point is stored."""
-        dt = self.time
-        return self._fname_template.format(year=dt.year, month=dt.month,
-                                           day=dt.day)
+        raise NotImplementedError(
+            'This method should be defined in a mixin data set class')
 
     def __repr__(self):
         return ('{:s}(lat={:f}, lon={:f}, time=\'{:s}\')'
@@ -94,8 +93,6 @@ class GsstfNcep:
 
     https://catalog.data.gov/dataset/ncep-doe-reanalysis-ii-for-gsstf-0-25x0-25-deg-daily-grid-v3-gsstf-ncep-at-ges-disc-v3
     """
-    # Data set's file name template...
-    _fname_template = 'GSSTF_NCEP.3.{year:04d}.{month:02d}.{day:02d}.he5'
 
     @property
     def lon_res(self):
@@ -154,6 +151,13 @@ class GsstfNcep:
     def grid_size_time(self):
         """Number of grid cells along the time axis."""
         return 7850
+
+    @property
+    def filename(self):
+        """Return the name of the file where the data point is stored."""
+        _fname_template = 'GSSTF_NCEP.3.{year:04d}.{month:02d}.{day:02d}.he5'
+        dt = self.time
+        return _fname_template.format(year=dt.year, month=dt.month, day=dt.day)
 
 
 class GsstfDataPoint(GsstfNcep, DataPoint):
@@ -331,6 +335,12 @@ class Cortad:
     def grid_size_time(self):
         """Number of grid cells along the time axis."""
         return 1617
+
+    @property
+    def filename(self):
+        """Return the name of the file where the data point is stored."""
+        raise NotImplementedError(
+            'This method should be defined in a specific CoRTAD mixin class')
 
 
 class CortadDataPoint(Cortad, DataPoint):
