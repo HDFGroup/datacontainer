@@ -181,7 +181,7 @@ class DataRegion:
         if not all([isinstance(d, DataPoint) for d in dpoints]):
             raise TypeError('All region points must be DataPoint objects')
 
-        # Compute bounding box (geo and dataspace)...
+        # Compute geo bounding box...
         lons = [d.lon for d in dpoints]
         lats = [d.lat for d in dpoints]
         times = [d.time for d in dpoints]
@@ -190,6 +190,8 @@ class DataRegion:
             ['min_lon', 'max_lon', 'max_lat', 'min_lat', 'begin', 'end'])
         self._databbox = DataBBox(min(lons), max(lons), max(lats), min(lats),
                                   min(times), max(times))
+
+        # Compute dataspace bounding box...
         lons_idx = [d.lon_idx for d in dpoints]
         lats_idx = [d.lat_idx for d in dpoints]
         times_idx = [d.time_idx for d in dpoints]
@@ -250,14 +252,19 @@ class DataRegion:
                 lat += self.lat_res
             time += self.time_res
 
-    def __repr__(self):
-        dbbox = self.databbox
+    def bbox_dpoints(self):
+        """Calculate the number of data points within the region's bounding
+        box."""
         ix = self.idxbbox
         n = (ix.max_lon - ix.min_lon + 1) * (ix.max_lat - ix.min_lat + 1) * \
             (ix.end - ix.begin + 1)
+        return n
+
+    def __repr__(self):
+        dbbox = self.databbox
         return ('<{:s}, {:d} data points, lon range={:f} degrees, '
                 'lat range={:f} degrees, time range={}>'
-                .format(type(self).__name__, n,
+                .format(type(self).__name__, self.bbox_dpoints(),
                         dbbox.max_lon - dbbox.min_lon,
                         dbbox.max_lat - dbbox.min_lat,
                         dbbox.end - dbbox.begin))
