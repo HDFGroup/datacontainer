@@ -1,4 +1,5 @@
 import sys
+import os
 import h5py
 import numpy as np
 
@@ -33,7 +34,16 @@ def main():
     if len(sys.argv) <= 1:
        print("convert_ghcn <filename>")
        sys.exit(-1)
-    f = h5py.File("ghcn.h5", 'a')
+    if not os.path.isfile(sys.argv[1]):
+       print("file not found")
+       sys.exit(-1)
+    outfile_name = sys.argv[1]
+    if not outfile_name.endswith(".csv"):
+        print("expected filename to have .csv suffix")
+        sys.exit(-1)
+    outfile_name = outfile_name[:-4] + ".h5"
+     
+    f = h5py.File(outfile_name, 'a')
     if "dset" not in f:
         dt = np.dtype([('station', 'S11'), ('date', 'S8'), ('obstype', 'S4'), ('obsval', 'i4'), ('code1', 'S1'), ('code2', 'S1'), ('code3', 'S1'), ('obstime', 'S4')])   
         dset = f.create_dataset("dset", (0,), dtype=dt, maxshape=(None,))
@@ -54,7 +64,8 @@ def main():
                 
     add_lines(dset, lines)
                     
-    f.close()                   
+    f.close()   
+    print("saved to: ", outfile_name)                
     
     
 main()
