@@ -37,13 +37,13 @@ class Index3d(tables.IsDescription):
     max_val = tables.Float64Col()
 
 # Which indexing class (schema) to use...
-Index = Index2d
+Index = Index3d
 
 # Where the files to index are...
-path = '/Users/ajelenak/Downloads'
+path = '/mnt'
 
 # Filename signature of data to index...
-fname_sig = 'GSSTF_NCEP.3.*.he5'
+fname_sig = 'GSSTF_NCEP.3.concat.h5'
 
 # Let's find some files...
 files = glob.glob(os.path.join(path, fname_sig))
@@ -58,6 +58,11 @@ h5path = [
     '/HDFEOS/GRIDS/NCEP/Data Fields/SST',
     '/HDFEOS/GRIDS/NCEP/Data Fields/Tair_2m',
 ]
+
+# Order of dimensions in the datasets...
+time_dim = 0
+lat_dim = 1
+lon_dim = 2
 
 # File that holds the index...
 index_file = 'GSSTF_NCEP.3.index.h5'
@@ -100,15 +105,19 @@ for fname in files:
             args += list(range(0, shape[n], chunk[n]))
         for s in itertools.product(*args):
             e = tuple([i + j for i, j in zip(s, chunk)])
-            chunk_data = dset[s[0]:e[0], s[1]:e[1]]
+            chunk_data = (dset[s[time_dim]:e[time_dim],
+                               s[lat_dim]:e[lat_dim],
+                               s[lon_dim]:e[lon_dim]])
 
             # Store indexing info into the table...
             row = tabl[p].row
             row['fname'] = just_fname
-            row['grid_lat_start'] = s[0]
-            row['grid_lat_end'] = e[0]
-            row['grid_lon_start'] = s[1]
-            row['grid_lon_end'] = e[1]
+            row['grid_t_start'] = s[time_dim]
+            row['grid_t_end'] = e[time_dim]
+            row['grid_lat_start'] = s[lat_dim]
+            row['grid_lat_end'] = e[lat_dim]
+            row['grid_lon_start'] = s[lon_dim]
+            row['grid_lon_end'] = e[lon_dim]
             row['min_val'] = np.min(chunk_data)
             row['max_val'] = np.max(chunk_data)
 
