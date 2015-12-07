@@ -39,7 +39,7 @@ class Index3d(tables.IsDescription):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('fname_sig', help='File(s) with data to index')
-parser.add_argument('index', help='Index (output) file name')
+parser.add_argument('index_file', help='Index (output) file name')
 parser.add_argument('schema', help='Table schema to use',
                     choices=['Index2d', 'Index3d'])
 args = parser.parse_args()
@@ -71,7 +71,7 @@ lon_dim = 2
 
 # Create the index file...
 idx_f = tables.open_file(
-    args.index, mode='w',
+    args.index_file, mode='w',
     title='Index file for %s' % os.path.basename(args.fname_sig))
 
 # Expected number of table rows (important for optimal performance)...
@@ -129,4 +129,4 @@ for fname in files:
         tabl[p].flush()
 
 idx_f.close()
-print('Done! Check out:', os.path.abspath(args.index))
+print('Done! Check out:', os.path.abspath(args.index_file))
