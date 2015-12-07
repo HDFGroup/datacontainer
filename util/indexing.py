@@ -120,6 +120,7 @@ for fname in files:
             row['grid_lon_end'] = e[lon_dim]
             row['min_val'] = np.min(chunk_data)
             row['max_val'] = np.max(chunk_data)
+            row.append()
 
         # Flush the table...
         tabl[p].flush()
