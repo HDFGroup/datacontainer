@@ -77,11 +77,11 @@ num_rows = len(files)
 # Create tables for all indices...
 tabl = dict()
 for d in h5path:
-    tabl['d'] = idx_f.create_table(os.path.dirname(d),
-                                   os.path.basename(d),
-                                   Index,
-                                   title='Index table for ' + d,
-                                   expectedrows=num_rows, createparents=True)
+    tabl[d] = idx_f.create_table(os.path.dirname(d),
+                                 os.path.basename(d),
+                                 Index,
+                                 title='Index table for ' + d,
+                                 expectedrows=num_rows, createparents=True)
 
 for fname in files:
     # Open the input file...
@@ -102,7 +102,7 @@ for fname in files:
         shape = dset.shape
         args = tuple()
         for n in range(len(shape)):
-            args += list(range(0, shape[n], chunk[n]))
+            args += tuple([list(range(0, shape[n], chunk[n]))])
         for s in itertools.product(*args):
             e = tuple([i + j for i, j in zip(s, chunk)])
             chunk_data = (dset[s[time_dim]:e[time_dim],
