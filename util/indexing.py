@@ -16,7 +16,7 @@ import h5py
 
 class Index2d(tables.IsDescription):
     """Table schema for index information for 2D datasets."""
-    fname = tables.StringCol(30)
+    fname = tables.StringCol(100)
     grid_lat_start = tables.UInt32Col()
     grid_lat_end = tables.UInt32Col()
     grid_lon_start = tables.UInt32Col()
@@ -27,7 +27,7 @@ class Index2d(tables.IsDescription):
 
 class Index3d(tables.IsDescription):
     """Table schema for index information for 3D datasets."""
-    fname = tables.StringCol(30)
+    fname = tables.StringCol(100)
     grid_t_start = tables.UInt32Col()
     grid_t_end = tables.UInt32Col()
     grid_lat_start = tables.UInt32Col()
