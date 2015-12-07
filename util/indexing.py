@@ -8,6 +8,7 @@ import os
 import sys
 import glob
 import itertools
+import argparse
 import tables
 import numpy as np
 import h5py
@@ -36,19 +37,23 @@ class Index3d(tables.IsDescription):
     min_val = tables.Float64Col()
     max_val = tables.Float64Col()
 
+parser = argparse.ArgumentParser()
+parser.add_argument('fname_sig', help='File(s) with data to index')
+parser.add_argument('index', help='Index (output) file name')
+parser.add_argument('schema', help='Table schema to use',
+                    choices=['Index2d', 'Index3d'])
+args = parser.parse_args()
+
 # Which indexing class (schema) to use...
-Index = Index3d
-
-# Where the files to index are...
-path = '/mnt'
-
-# Filename signature of data to index...
-fname_sig = 'GSSTF_NCEP.3.concat.h5'
+if args.schema == 'Index2d':
+    Index = Index2d
+elif args.schema == 'Index3d':
+    Index = Index3d
 
 # Let's find some files...
-files = glob.glob(os.path.join(path, fname_sig))
+files = glob.glob(args.fname_sig)
 if len(files) == 0:
-    print('No %s files found in %s' % (fname_sig, path))
+    print('No files found in %s' % args.fname_sig)
     sys.exit()
 
 # Which HDF5 datasets' data to index...
@@ -64,12 +69,10 @@ time_dim = 0
 lat_dim = 1
 lon_dim = 2
 
-# File that holds the index...
-index_file = 'GSSTF_NCEP.3.index.h5'
-
 # Create the index file...
-idx_f = tables.open_file(index_file, mode='w',
-                         title='Index file for %s' % fname_sig)
+idx_f = tables.open_file(
+    args.index, mode='w',
+    title='Index file for %s' % os.path.basename(args.fname_sig))
 
 # Expected number of table rows (important for optimal performance)...
 num_rows = len(files)
@@ -126,4 +129,4 @@ for fname in files:
         tabl[p].flush()
 
 idx_f.close()
-print('Done! Check out:', os.path.abspath(index_file))
+print('Done! Check out:', os.path.abspath(args.index))
