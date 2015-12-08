@@ -90,13 +90,9 @@ for fname in files:
         # Create tables for all dataset's indexing data...
         tabl = dict()
         for d in h5path:
-            # Figure out the number of table rows...
-            if len(files) == 1:
-                # Single file case: use the first dimension size...
-                num_rows = in_f[d].shape[0]
-            else:
-                # Multiple files case: use the number of files...
-                num_rows = len(files)
+            # Estimate the number of table rows...
+            num_row = np.product([np.ceil(s[0]/s[1])
+                                  for s in zip(in_f[d].shape, in_f[d].chunks)])
 
             print('Creating a table for %s with schema %s and %d rows'
                   % (d, args.schema, num_rows))
@@ -104,7 +100,7 @@ for fname in files:
                                          os.path.basename(d),
                                          Index,
                                          title='Index table for ' + d,
-                                         expectedrows=num_rows,
+                                         expectedrows=int(num_rows),
                                          createparents=True)
 
     for p in h5path:
@@ -142,6 +138,9 @@ for fname in files:
 
         # Flush the table...
         tabl[p].flush()
+
+    # Done with the input data file...
+    in_f.close()
 
 #  select table columns. Set the indexing algorithm to the
 # "ludicrous" setting...
