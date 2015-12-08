@@ -143,10 +143,14 @@ for fname in files:
         # Flush the table...
         tabl[p].flush()
 
-# Create indices on various table columns. Set the indexing algorithm to the
+#  select table columns. Set the indexing algorithm to the
 # "ludicrous" setting...
-# for t in tabl:
-
+for t in tabl:
+    print('Creating index on table', t)
+    tabl[t].cols.fname.create_csindex()
+    tabl[t].cols.min_val.create_csindex()
+    tabl[t].cols.max_val.create_csindex()
 
 idx_f.close()
+print(args.index_file)
 print('Done! Check out:', os.path.abspath(args.index_file))
