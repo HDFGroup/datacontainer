@@ -16,26 +16,26 @@ import h5py
 
 class Index2d(tables.IsDescription):
     """Table schema for index information for 2D datasets."""
-    fname = tables.StringCol(100)
-    grid_lat_start = tables.UInt32Col()
-    grid_lat_end = tables.UInt32Col()
-    grid_lon_start = tables.UInt32Col()
-    grid_lon_end = tables.UInt32Col()
-    min_val = tables.Float64Col()
-    max_val = tables.Float64Col()
+    fname = tables.StringCol(100, pos=0)
+    grid_lat_start = tables.UInt32Col(pos=1)
+    grid_lat_end = tables.UInt32Col(pos=2)
+    grid_lon_start = tables.UInt32Col(pos=3)
+    grid_lon_end = tables.UInt32Col(pos=4)
+    min_val = tables.Float64Col(pos=5)
+    max_val = tables.Float64Col(pos=6)
 
 
 class Index3d(tables.IsDescription):
     """Table schema for index information for 3D datasets."""
-    fname = tables.StringCol(100)
-    grid_t_start = tables.UInt32Col()
-    grid_t_end = tables.UInt32Col()
-    grid_lat_start = tables.UInt32Col()
-    grid_lat_end = tables.UInt32Col()
-    grid_lon_start = tables.UInt32Col()
-    grid_lon_end = tables.UInt32Col()
-    min_val = tables.Float64Col()
-    max_val = tables.Float64Col()
+    fname = tables.StringCol(100, pos=0)
+    grid_t_start = tables.UInt32Col(pos=1)
+    grid_t_end = tables.UInt32Col(pos=2)
+    grid_lat_start = tables.UInt32Col(pos=3)
+    grid_lat_end = tables.UInt32Col(pos=4)
+    grid_lon_start = tables.UInt32Col(pos=5)
+    grid_lon_end = tables.UInt32Col(pos=6)
+    min_val = tables.Float64Col(pos=7)
+    max_val = tables.Float64Col(pos=8)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('fname_sig', help='File(s) with data to index')
