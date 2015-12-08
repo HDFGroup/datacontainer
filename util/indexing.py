@@ -74,9 +74,6 @@ idx_f = tables.open_file(
     args.index_file, mode='w',
     title='Index file for %s' % os.path.basename(args.fname_sig))
 
-# Expected number of table rows (important for optimal performance)...
-num_rows = len(files)
-
 first_pass = True
 for fname in files:
     # Open the input file...
@@ -91,7 +88,7 @@ for fname in files:
         tabl = dict()
         for d in h5path:
             # Estimate the number of table rows...
-            num_row = np.product([np.round(s[0]/s[1])
+            num_rows = np.product([np.round(s[0]/s[1])
                                   for s in zip(in_f[d].shape, in_f[d].chunks)])
 
             print('Creating a table for %s with schema %s and %d rows'
