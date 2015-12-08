@@ -77,20 +77,35 @@ idx_f = tables.open_file(
 # Expected number of table rows (important for optimal performance)...
 num_rows = len(files)
 
-# Create tables for all indices...
-tabl = dict()
-for d in h5path:
-    tabl[d] = idx_f.create_table(os.path.dirname(d),
-                                 os.path.basename(d),
-                                 Index,
-                                 title='Index table for ' + d,
-                                 expectedrows=num_rows, createparents=True)
-
+first_pass = True
 for fname in files:
     # Open the input file...
     print('Processing', fname)
     in_f = h5py.File(fname, 'r')
     just_fname = os.path.basename(fname)
+
+    if first_pass:
+        first_pass = False
+
+        # Create tables for all dataset's indexing data...
+        tabl = dict()
+        for d in h5path:
+            # Figure out the number of table rows...
+            if len(files) == 1:
+                # Single file case: use the first dimension size...
+                num_rows = in_f[d].shape[0]
+            else:
+                # Multiple files case: use the number of files...
+                num_rows = len(files)
+
+            print('Creating a table for %s with schema %s and %d rows'
+                  % (d, args.schema, num_rows))
+            tabl[d] = idx_f.create_table(os.path.dirname(d),
+                                         os.path.basename(d),
+                                         Index,
+                                         title='Index table for ' + d,
+                                         expectedrows=num_rows,
+                                         createparents=True)
 
     for p in h5path:
         # Get the dataset and its chunk size...
@@ -127,6 +142,11 @@ for fname in files:
 
         # Flush the table...
         tabl[p].flush()
+
+# Create indices on various table columns. Set the indexing algorithm to the
+# "ludicrous" setting...
+# for t in tabl:
+
 
 idx_f.close()
 print('Done! Check out:', os.path.abspath(args.index_file))
