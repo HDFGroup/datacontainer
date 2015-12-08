@@ -91,7 +91,7 @@ for fname in files:
         tabl = dict()
         for d in h5path:
             # Estimate the number of table rows...
-            num_row = np.product([np.ceil(s[0]/s[1])
+            num_row = np.product([np.round(s[0]/s[1])
                                   for s in zip(in_f[d].shape, in_f[d].chunks)])
 
             print('Creating a table for %s with schema %s and %d rows'
