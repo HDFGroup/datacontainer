@@ -1,0 +1,24 @@
+ttle: GHCN CSV
+format: CSV  
+Number Files: 253  
+Total Size: 83GB
+File Size: 
+Compression: None
+Chunking: None
+Source: http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/
+Description: Weather station daily reports
+datasets.  One file per year, 1763 through 2015
+location: s3://hdfdata/ghcn_csv/
+
+ttle: GHCN HDF5
+format: HDF5  
+Number Files: 253  
+Total Size: 83GB
+File Size: 30K to 1.2GB
+Compression: None
+Chunking: None
+Source: http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/
+Description: Weather station daily reports
+datasets.  One file per year, 1763 through 2015
+location: s3://hdfdata/ghcn_h5/
+ 
