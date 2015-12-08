@@ -132,8 +132,13 @@ for fname in files:
             row['grid_lat_end'] = e[lat_dim]
             row['grid_lon_start'] = s[lon_dim]
             row['grid_lon_end'] = e[lon_dim]
-            row['min_val'] = np.min(chunk_data)
-            row['max_val'] = np.max(chunk_data)
+            good_chunk_data = chunk_data[chunk_data != dset.fillvalue]
+            if np.any(good_chunk_data):
+                row['min_val'] = np.min(chunk_data)
+                row['max_val'] = np.max(chunk_data)
+            else:
+                row['min_val'] = dset.fillvalue
+                row['max_val'] = dset.fillvalue
             row.append()
 
         # Flush the table...
