@@ -111,32 +111,29 @@ for fname in files:
         # Pull data for each chunk, collect descriptive stats, and store in the
         # table...
         shape = dset.shape
-        args = tuple()
+        arg = tuple()
         for n in range(len(shape)):
-            args += tuple([list(range(0, shape[n], chunk[n]))])
-        for s in itertools.product(*args):
+            arg += tuple([list(range(0, shape[n], chunk[n]))])
+        for s in itertools.product(*arg):
             e = tuple([i + j for i, j in zip(s, chunk)])
             chunk_data = (dset[s[time_dim]:e[time_dim],
                                s[lat_dim]:e[lat_dim],
                                s[lon_dim]:e[lon_dim]])
 
             # Store indexing info into the table...
-            row = tabl[p].row
-            row['fname'] = just_fname
-            row['grid_t_start'] = s[time_dim]
-            row['grid_t_end'] = e[time_dim]
-            row['grid_lat_start'] = s[lat_dim]
-            row['grid_lat_end'] = e[lat_dim]
-            row['grid_lon_start'] = s[lon_dim]
-            row['grid_lon_end'] = e[lon_dim]
             good_chunk_data = chunk_data != dset.fillvalue
             if np.any(good_chunk_data):
+                row = tabl[p].row
+                row['fname'] = just_fname
+                row['grid_t_start'] = s[time_dim]
+                row['grid_t_end'] = e[time_dim]
+                row['grid_lat_start'] = s[lat_dim]
+                row['grid_lat_end'] = e[lat_dim]
+                row['grid_lon_start'] = s[lon_dim]
+                row['grid_lon_end'] = e[lon_dim]
                 row['min_val'] = np.min(chunk_data[good_chunk_data])
                 row['max_val'] = np.max(chunk_data[good_chunk_data])
-            else:
-                row['min_val'] = dset.fillvalue
-                row['max_val'] = dset.fillvalue
-            row.append()
+                row.append()
 
         # Flush the table...
         tabl[p].flush()
@@ -153,5 +150,4 @@ for t in tabl:
     tabl[t].cols.max_val.create_csindex()
 
 idx_f.close()
-print(args.index_file)
 print('Done! Check out:', os.path.abspath(args.index_file))
