@@ -89,7 +89,7 @@ Usage page is here, http://s3tools.org/usage, but some common examples are:
     ```sh
     $ s3cmd du s3://hdfdata/
     ```
-    
+
     * Result is in human-friendly byte units (typically gigabytes)
     ```sh
     $ s3cmd du -H s3://hdfdata/  
@@ -135,3 +135,30 @@ From Griffin you can access the nova cli to monitor, create, and remove VMs:
         nova list | grep -v Running
 
 Full user guide is at: http://docs.openstack.org/cli-reference/content/.
+
+# Exporting PyTables Index File to Excel
+
+Install `pandas` and `xlsxwriter` packages:
+
+    conda install xlsxwriter
+    conde install pandas
+
+Run this python code in IPython:
+
+```python
+import os.path as osp
+import pandas
+idx_file = '{index filename}'
+idx = pandas.HDFStore(idx_file)
+xlsx_file = osp.splitext(idx_file)[0] + '.xlsx'
+xlsx = pandas.ExcelWriter(xlsx_file)
+for i in idx.iteritems():
+    table = getattr(idx.root, i[0])
+    df = pandas.DataFrame(table[:])
+    df['fname'] = df['fname'].str.decode('ascii')
+    print('Saving %s to Excel file' % table.name)
+    df.to_excel(xlsx, table.name)
+
+print('Saving Excel file', xlsx_file)
+xlsx.save()
+```
