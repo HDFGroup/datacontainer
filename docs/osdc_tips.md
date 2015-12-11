@@ -141,7 +141,7 @@ Full user guide is at: http://docs.openstack.org/cli-reference/content/.
 Install `pandas` and `xlsxwriter` packages:
 
     conda install xlsxwriter
-    conde install pandas
+    conda install pandas
 
 Run this python code in IPython:
 
@@ -161,4 +161,5 @@ for i in idx.iteritems():
 
 print('Saving Excel file', xlsx_file)
 xlsx.save()
+idx.close()
 ```
