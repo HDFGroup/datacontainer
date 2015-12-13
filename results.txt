@@ -20,4 +20,5 @@ Date        Time    Filter      Dataset	 Size(GB)  Compression  Chunking   Platf
 12/07/15    13:10   Series.py   NCEP3     47       gzip         1x72x144   OSDC        he.xxlarge       1     n/a               6.3        s3://hdftest/ncep3_concat_chunk_1_72_144_gzip_9_series_out_hexx_c1.txt
 12/07/15    13:12   Series.py   NCEP3     46       gzip         25x20x20   OSDC        he.xxlarge       1     n/a               7.4        s3://hdftest/ncep3_concat_chunk_25_20_20_gzip_9_series_out_hexx_c1.txt
 12/07/15    13:35   Series.py   NCEP3     49       gzip         7850x1x1   OSDC        he.xxlarge       1     n/a               1.4        s3://hdftest/ncep3_concat_chunk_7850_1_1_gzip_9_series_out_hexx_c1.txt
-
+12/10/15    22:50   Summary.py  NCEP3    122       None         None       OSDC        m1.small        64     519.0             10.8       s3://hdftest/ncep_summary_out_m1_c64.txt	
+12/10/15    23:04   Series.py   NCEP3    122       None         None       OSDC        m1.small        64     519.0             1.8        s3://hdftest/ncep_series_out_m1_c64.txt	
