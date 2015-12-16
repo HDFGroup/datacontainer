@@ -6,8 +6,8 @@ import time
 
 return_values = []
 # file_path = '/mnt/data/GSSTF_NCEP.3.concat.1x72x144.gzip9.h5'
-file_path = '/mnt/data/GSSTF_NCEP.3.concat.25x20x20.gzip9.h5'
-# file_path = '/mnt/data/GSSTF_NCEP.3.concat.7850x1x1.gzip9.h5'
+# file_path = '/mnt/data/GSSTF_NCEP.3.concat.25x20x20.gzip9.h5'
+file_path = '/mnt/data/GSSTF_NCEP.3.concat.7850x1x1.gzip9.h5'
 file_name = os.path.basename(file_path)
 h5path = '/HDFEOS/GRIDS/NCEP/Data Fields/Tair_2m'
 return_values = []
