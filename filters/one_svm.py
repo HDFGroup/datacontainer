@@ -17,15 +17,12 @@ This program is adapted from scikit-learn one-class SVM example
 to identify outliers in GSSTF NCEP3 Sea Surface Temperature data
 near South America equator. 
 
-The goal is to identify El-Nino like event. 
+The goal is to identify El-Nino like event [1]. 
 
 The below is the to-do list:
 
-1) Test classifier on another location near training location.
-2) Run multiple classifiers and ensemble the results. 
-3) Change time index label to date string from file name.
-4) Run clustering on the years that are detected as outliers.
-5) Compare the years against NOAA's findings.
+1) Run multiple classifiers and ensemble the results. 
+2) Run clustering on the years that are detected as outliers.
 
 Plot generation is added for quick inspection of learning algorithm's
 behavior.
@@ -52,25 +49,36 @@ file_path = '/scr/GSSTF_NCEP.3/GSSTF_NCEP.3.concat.1x72x144.gzip9.h5'
 file_name = os.path.basename(file_path)
 h5path = '/HDFEOS/GRIDS/NCEP/Data Fields/SST'
 X_outliers = []
+X_outliers2 = []
 vals = []
-
+vals2 = []
 # Put the file name list on the same directory.
 with open('ncep3_list.txt') as f:
     content = f.readlines()
     
+years = []    
+for i in range(len(content)):
+    print(content[i][15:-11])
+    years.append(content[i][15:-11])
+# print years    
 start_time = time.time()
+
 
 # Pacific region near South America.
 lat = 360 # equator
 lon = 300 # -105 longitude = (+ -180 (* 0.25 300))
+lon2 = 290 
 with h5py.File(file_path, 'r') as f:
     
     dset = f[h5path]
 
     for i in range(7850):
         val = dset[i, lat, lon]
+        val2 = dset[i, lat, lon2]        
         vals.append(val)
-        X_outliers.append([val] )
+        vals2.append(val2)        
+        X_outliers.append([val])
+        X_outliers2.append([val2])
 end_time = time.time()
 
 # Generate train data.
@@ -100,25 +108,38 @@ y_pred_test = clf.predict(X_test)
 
 # This should be changed to other location to be more meaningful.
 y_pred_outliers = clf.predict(X_outliers)
+y_pred_outliers2 = clf.predict(X_outliers2)
 n_error_train = y_pred_train[y_pred_train == -1].size
 n_error_test = y_pred_test[y_pred_test == -1].size
 n_error_outliers = y_pred_outliers[y_pred_outliers == -1].size
+n_error_outliers2 = y_pred_outliers2[y_pred_outliers2 == -1].size
 index = np.where(y_pred_outliers == -1)[0]
-for i in index:
-    print(X_outliers[i])
+index2 = np.where(y_pred_outliers2 == -1)[0]
+
+for i in index2:
+    print(X_outliers2[i])
     print(content[i])
+
 print(n_error_train)
 print(n_error_test)
 print(n_error_outliers)
+print(n_error_outliers2)
 
 t = np.arange(0, 7850)
 
 plt.title("El Nino Detection")
 plt.plot(t, vals)
-for i in index:
-    plt.scatter(i, vals[i], c='red')
+year = years[0]
+for i in index2:
+    plt.scatter(i, vals2[i], c='red')
+    if year != years[i]:
+        plt.text(i, vals2[i]+0.5, years[i])
+        year = years[i]
 plt.ylabel('SST (deg-C)')
 plt.xlabel('time index')
 fig = plt.gcf()
 # plt.show()
 fig.savefig("one_svm.png")
+
+# References
+# [1] http://ggweather.com/enso/oni.htm
