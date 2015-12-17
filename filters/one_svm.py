@@ -50,36 +50,38 @@ file_name = os.path.basename(file_path)
 h5path = '/HDFEOS/GRIDS/NCEP/Data Fields/SST'
 X_outliers = []
 X_outliers2 = []
+X_outliers3 = []
 vals = []
 vals2 = []
+vals3 = []
 # Put the file name list on the same directory.
 with open('ncep3_list.txt') as f:
     content = f.readlines()
     
 years = []    
 for i in range(len(content)):
-    print(content[i][15:-11])
     years.append(content[i][15:-11])
-# print years    
-start_time = time.time()
-
 
 # Pacific region near South America.
 lat = 360 # equator
 lon = 300 # -105 longitude = (+ -180 (* 0.25 300))
-lon2 = 290 
+lon2 = 290
+lon3 = 280
+start_time = time.time()
 with h5py.File(file_path, 'r') as f:
     
     dset = f[h5path]
 
     for i in range(7850):
         val = dset[i, lat, lon]
-        val2 = dset[i, lat, lon2]        
+        val2 = dset[i, lat, lon2]
+        val3 = dset[i, lat, lon3]                
         vals.append(val)
-        vals2.append(val2)        
+        vals2.append(val2)
+        vals3.append(val3)                
         X_outliers.append([val])
         X_outliers2.append([val2])
-end_time = time.time()
+        X_outliers3.append([val3])
 
 # Generate train data.
 # You can use the first 80% data as training.
@@ -109,14 +111,20 @@ y_pred_test = clf.predict(X_test)
 # This should be changed to other location to be more meaningful.
 y_pred_outliers = clf.predict(X_outliers)
 y_pred_outliers2 = clf.predict(X_outliers2)
+y_pred_outliers3 = clf.predict(X_outliers3)
 n_error_train = y_pred_train[y_pred_train == -1].size
 n_error_test = y_pred_test[y_pred_test == -1].size
 n_error_outliers = y_pred_outliers[y_pred_outliers == -1].size
 n_error_outliers2 = y_pred_outliers2[y_pred_outliers2 == -1].size
+n_error_outliers3 = y_pred_outliers3[y_pred_outliers3 == -1].size
+end_time = time.time()
 index = np.where(y_pred_outliers == -1)[0]
 index2 = np.where(y_pred_outliers2 == -1)[0]
-
-for i in index2:
+index3 = np.where(y_pred_outliers3 == -1)[0]
+indexc = list(set(index3).intersection(set(index).intersection(index2)))
+print('# common indexes are')
+print(indexc)
+for i in indexc:
     print(X_outliers2[i])
     print(content[i])
 
@@ -124,13 +132,15 @@ print(n_error_train)
 print(n_error_test)
 print(n_error_outliers)
 print(n_error_outliers2)
+print(n_error_outliers3)
 
 t = np.arange(0, 7850)
+
 
 plt.title("El Nino Detection")
 plt.plot(t, vals)
 year = years[0]
-for i in index2:
+for i in indexc:
     plt.scatter(i, vals2[i], c='red')
     if year != years[i]:
         plt.text(i, vals2[i]+0.5, years[i])
