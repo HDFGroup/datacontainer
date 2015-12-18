@@ -6,7 +6,8 @@ import glob
 import h5py
 
 # Where the files to concatenate are...
-path = '/mnt/ncep-orig'
+#path = '/mnt/ncep-orig'
+path = '/mnt/work/HDF/data/NOAA/ghcn_h5/'
 
 # Filename signature...
 fname_sig = 'GSSTF_NCEP.3.*.he5'
