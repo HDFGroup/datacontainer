@@ -2,9 +2,6 @@ import sys
 import os
 import h5py
 import numpy as np
-
-
- 
             
 def add_lines(dset, lines):
     num_lines = len(lines)
@@ -45,7 +42,7 @@ def main():
      
     f = h5py.File(outfile_name, 'a')
     if "dset" not in f:
-        dt = np.dtype([('station', 'S11'), ('date', 'S8'), ('obstype', 'S4'), ('obsval', 'i4'), ('code1', 'S1'), ('code2', 'S1'), ('code3', 'S1'), ('obstime', 'S4')])   
+        dt = np.dtype([('station', 'S11'), ('date', 'S8'), ('element', 'S4'), ('value', 'i4'), ('mflag', 'S1'), ('qflag', 'S1'), ('sflag', 'S1'), ('obstime', 'S4')])   
         dset = f.create_dataset("dset", (0,), dtype=dt, maxshape=(None,))
     else:
         dset = f['dset']
