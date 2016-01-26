@@ -74,4 +74,5 @@ Date        Time    Filter      Dataset	 Size(GB)  Compression  Chunking   Platf
 01/22/16    20:35   Sum..hy.py NCEP3     122       None         None       OSDC        he.xxlarge       1    n/a             3297.1        s3://hdftest/ncep_summary_hyrax_out.local.he.xxlarge.txt
 01/22/16    20:48   Sum..hy.py NCEP3      46       gzip_9    25x20x20      OSDC        he.xxlarge       1    n/a            13946.5        s3://hdftest/ncep_concat_chunk_25_20_20_gzip_9_summary_hyrax_out.local.he.xxlarge.txt
 01/25/16    15:46   Sum..hy.py NCEP3     122       None         None       OSDC        m1.small         1    n/a             1793.3        s3://hdftest/ncep_summary_hyrax_out.net.m1.small.txt
+01/25/16    18:35   Sum..hy.py NCEP3      46       gzip_9    25x20x20      OSDC        m1.small         1    n/a            13296.5        s3://hdftest/ncep_concat_chunk_25_20_20_gzip_9_summary_hyrax_out.net.m1.small.txt
 
