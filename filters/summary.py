@@ -57,8 +57,6 @@ def main():
     # or 
     # /HDFEOS/GRIDS/NCEP/Data\ Fields/Tair_2m
     
-    file_names = []
-
     args = parser.parse_args()
 
     if not args.filename and not args.input:
