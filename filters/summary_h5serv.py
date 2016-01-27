@@ -40,6 +40,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', "--filename", help="h5serv domain")
     parser.add_argument('-p', "--path", help="h5path")
+    parser.add_argument('-e', "--endpoint", help="h5serv endpoint")
      
     # example file:
     # public AWS -
@@ -59,12 +60,18 @@ def main():
         
     if not args.path:
         sys.exit("No h5path specified!")
+        
+    if not args.endpoint:
+        endpoint = "http://127.0.0.1:5000"
+    else:
+        endpoint = args.endpoint
     
     h5path = args.path
     h5serv_domain = args.filename
     print("domain:", h5serv_domain)
     print("h5path:", h5path)
-    endpoint = "http://127.0.0.1:5000"
+    print("endpoint:", endpoint)
+    
         
     with h5pyd.File(h5serv_domain, endpoint=endpoint) as f:
             dset = f[h5path]
