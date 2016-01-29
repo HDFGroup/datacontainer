@@ -77,7 +77,7 @@ def main():
             num_days = dset.shape[0]
             
     print("start processing")
-    num_days = 10    
+    
     # run process_files on engines
     start_time = time.time()       
     
