@@ -77,13 +77,13 @@ def main():
             num_days = dset.shape[0]
             
     print("start processing")
-        
+    num_days = 10    
     # run process_files on engines
     start_time = time.time()       
     
     output = []
     for day in range(num_days):
-        print("day:", day)
+        print("day:", day, flush=True)
         result = summary(day)
         output.append(result)
         
