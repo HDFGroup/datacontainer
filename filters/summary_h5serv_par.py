@@ -7,13 +7,16 @@ import time
 import argparse
 import h5pyd
 import numpy
+from ipyparallel import Client
 
-#globals
-endpoint = None
-h5path = None
-h5serv_domain = None
- 
+
 def summary(day):
+    # import within the function so the engines will pick them up
+    import sys
+    import os
+    import h5pyd
+    import numpy
+     
      
     return_value = None
           
@@ -50,8 +53,6 @@ def main():
     # or 
     # /HDFEOS/GRIDS/NCEP/Data\ Fields/Tair_2m
     
-    global endpoint, h5path, h5serv_domain
-    
     args = parser.parse_args()
 
     if not args.filename and not args.input:
@@ -76,23 +77,44 @@ def main():
             dset = f[h5path]
             num_days = dset.shape[0]
             
+    rc = Client()
+    if len(rc.ids) == 0:
+        sys.exit("No engines found")
+    print(len(rc.ids), "engines")    
+    
+    dview = rc[:] 
+    dview.push(dict(h5serv_domain=h5serv_domain, h5path=h5path, endpoint=endpoint))
+     
     print("start processing")
         
     # run process_files on engines
     start_time = time.time()       
     
-    output = []
-    for day in range(num_days):
-        print("day:", day)
-        result = summary(day)
-        output.append(result)
-        
+    #num_days = 10
+    output = dview.map_sync(summary, range(num_days))
     end_time = time.time()
     print(">>>>> runtime: {0:6.3f}s".format(end_time - start_time))
-        
-    for item in output:
+     
+    # sort the output by first field (filename) 
+    output_dict = {} 
+    for elem in output:
+        if type(elem) is list:
+            # output from engines, break out each tuple
+            for item in elem:
+                k = item[0]
+                if k not in output_dict:
+                    output_dict[k] = item
+        else:
+            k = elem[0]
+            if k not in output_dict:
+                output_dict[k] = elem
+                    
+    keys = list(output_dict.keys())
+    keys.sort()
+    for k in keys:
         text = ""
-        for value in item:
+        values = output_dict[k]
+        for value in values:
             text += str(value) + "   "
         print(text)
     
