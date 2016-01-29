@@ -2,8 +2,13 @@ import time
 import pydap
 import numpy
 from pydap.client import open_url
+
+# Pick URL for either Hyrax or THREDDS / Localhost or Network.
+file_path = 'http://localhost:8080/thredds/dodsC/testAll/GSSTF_NCEP.3.concat.25x20x20.gzip9.h5'
+# file_path = 'http://localhost:8080/thredds/dodsC/testAll/GSSTF_NCEP.3.concat.1x72x144.gzip9.h5'
+# file_path = 'http://localhost:8080/thredds/dodsC/testAll/GSSTF_NCEP.3_concat.h5'
 # file_path = 'http://localhost:8080/opendap/data/hdf5/GSSTF_NCEP.3_concat.h5'
-file_path = 'http://172.17.192.40:8080/opendap/data/hdf5/GSSTF_NCEP.3_concat.h5'
+# file_path = 'http://172.17.192.40:8080/opendap/data/hdf5/GSSTF_NCEP.3_concat.h5'
 return_values = []
 dataset = open_url(file_path)
 # Make sure that server returns datasets.
