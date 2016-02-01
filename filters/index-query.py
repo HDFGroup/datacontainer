@@ -19,10 +19,14 @@ def n_at_time(shape, chunk, n=1):
     """Return an iterator that produces a list of``n`` tuples at a time holding
     dataset chunks' first element indices.
 
+    ``shape`` and ``chunk`` must have the same number of elements.
+
     :arg tuple shape: HDF5 dataset's shape.
     :arg tuple chunk: HDF5 dataset's chunk size.
     :arg int n: How many tuples to produce at a time.
     """
+    if len(shape) != len(chunk):
+        raise ValueError('shape and chunk must have same number of elements')
     arg = tuple()
     for i in range(len(shape)):
         arg += tuple([range(0, shape[i], chunk[i])])
@@ -31,7 +35,9 @@ def n_at_time(shape, chunk, n=1):
 
 
 def where_func(fname, dpath, val_range):
-    """The engine function that runs the "query".
+    """The engine function that runs the query.
+
+    It returns the count of the result set.
 
     :arg str fname: HDF5 file name where the data is.
     :arg str dname: Dataset full path.
@@ -62,7 +68,7 @@ def where_func(fname, dpath, val_range):
                 result.append(
                     tuple([tuple(map(lambda a, b: a+b, t, c)), chunk_data[t]]))
 
-    return result
+    return len(result)
 
 
 class Timing:
@@ -172,7 +178,8 @@ timing.checkpoint('processing')
 # single record...
 res = list(itertools.chain.from_iterable(res))
 print('\nBrute force method')
-print('Found %d grid cells that satisfy the query criteria' % len(res))
+print('Number of grid cells to search was', len(chunks))
+print('Found %d grid cells that satisfy the query criteria' % sum(res))
 
 timing.checkpoint('report')
 
@@ -202,7 +209,8 @@ res = dv.apply_sync(where_func, data_fname, dset_name, val_range)
 timing.checkpoint('processing')
 res = list(itertools.chain.from_iterable(res))
 print('\nBlock range index method')
-print('Found %d grid cells that satisfy the query criteria' % len(res))
+print('Number of grid cells to search was', len(chunks))
+print('Found %d grid cells that satisfy the query criteria' % sum(res))
 timing.checkpoint('report')
 print('\nTiming information:')
 print(timing.as_text())
