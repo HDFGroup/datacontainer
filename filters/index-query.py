@@ -5,6 +5,7 @@ import itertools
 import h5py
 import ipyparallel
 import tables
+import numpy as np
 
 
 def check_file_exists(fname):
@@ -68,7 +69,7 @@ def where_func(fname, dpath, val_range):
                 result.append(
                     tuple([tuple(map(lambda a, b: a+b, t, c)), chunk_data[t]]))
 
-    return len(result)
+    return [len(result)]
 
 
 class Timing:
@@ -169,7 +170,8 @@ timing.checkpoint('prep time')
 
 # Partition the chunks list over all engines...
 dv.scatter('chunks', chunks)
-
+num_chunks = len(chunks)
+del chunks
 timing.checkpoint('preload data')
 res = dv.apply_sync(where_func, data_fname, dset_name, val_range)
 timing.checkpoint('processing')
@@ -178,7 +180,7 @@ timing.checkpoint('processing')
 # single record...
 res = list(itertools.chain.from_iterable(res))
 print('\nBrute force method')
-print('Number of grid cells to search was', len(chunks))
+print('Number of grid cells to search was', num_chunks*np.prod(chunk))
 print('Found %d grid cells that satisfy the query criteria' % sum(res))
 
 timing.checkpoint('report')
@@ -204,12 +206,14 @@ f.close()
 timing.checkpoint('prep time')
 dv = rc[:]
 dv.scatter('chunks', chunks)
+num_chunks = len(chunks)
+del chunks
 timing.checkpoint('preload data')
 res = dv.apply_sync(where_func, data_fname, dset_name, val_range)
 timing.checkpoint('processing')
 res = list(itertools.chain.from_iterable(res))
 print('\nBlock range index method')
-print('Number of grid cells to search was', len(chunks))
+print('Number of grid cells to search was', num_chunks*np.prod(chunk))
 print('Found %d grid cells that satisfy the query criteria' % sum(res))
 timing.checkpoint('report')
 print('\nTiming information:')
