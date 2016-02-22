@@ -6,7 +6,8 @@ import time
 
 # file_path = '/mnt/data/GSSTF_NCEP.3.concat.1x72x144.gzip9.h5'
 # file_path = '/mnt/data/GSSTF_NCEP.3.concat.25x20x20.gzip9.h5'
-file_path = '/mnt/data/GSSTF_NCEP.3.concat.7850x1x1.gzip9.h5'
+#file_path = '/mnt/data/GSSTF_NCEP.3.concat.7850x1x1.gzip9.h5'
+file_path = '/mnt/mongodb/NCEP_Concat.h5'
 h5path = '/HDFEOS/GRIDS/NCEP/Data Fields/Tair_2m'
 return_values = []
 print("start processing")
@@ -27,5 +28,6 @@ with h5py.File(file_path, 'r') as f:
 
         return_values.append( (file_path, len(v), numpy.min(v), numpy.max(v), numpy.mean(v),numpy.median(v), numpy.std(v) ) )
 end_time = time.time()
-print(">>>>> runtime: {0:6.3f}s".format(end_time - start_time))
+
 print(return_values)
+print(">>>>> runtime: {0:6.3f}s".format(end_time - start_time))

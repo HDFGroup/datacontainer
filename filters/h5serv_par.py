@@ -4,17 +4,23 @@ import sys
 import os
 import subprocess
 import time
-import argparse
 import h5pyd
 import numpy
+import argparse
+from ipyparallel import Client
 
-#globals
-endpoint = None
-h5path = None
-h5serv_domain = None
- 
+#
+# Run filter using multiple clients and one h5serv instance
+#
+#
 def summary(day):
-     
+    # import within the function so the engines will pick them up
+    import h5pyd
+    import numpy
+    global endpoint
+    global h5path
+    global h5serv_domain
+    
     return_value = None
           
     with h5pyd.File(h5serv_domain, endpoint=endpoint) as f:
@@ -32,7 +38,8 @@ def summary(day):
                 numpy.median(v), numpy.std(v) )   
                 
     return return_value
-
+    
+     
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', "--filename", help="h5serv domain")
@@ -53,49 +60,70 @@ def main():
     global endpoint, h5path, h5serv_domain
     
     args = parser.parse_args()
-
-    if not args.filename and not args.input:
-        sys.exit("No filename specified!")
-        
+    
     if not args.path:
-        sys.exit("No h5path specified!")
+        h5path = "/HDFEOS/GRIDS/NCEP/Data Fields/Tair_2m"
+    else:
+        h5path = args.path
         
     if not args.endpoint:
         endpoint = "http://127.0.0.1:5000"
     else:
         endpoint = args.endpoint
+        
+    if not args.filename:
+        h5serv_domain = "NCEP3_concat.hdfgroup.org"
+    else:
+        h5serv_domain = args.filename
     
-    h5path = args.path
-    h5serv_domain = args.filename
-    print("domain:", h5serv_domain)
     print("h5path:", h5path)
     print("endpoint:", endpoint)
+    print("domain:", h5serv_domain)
     
-        
+    rc = Client()
+    if len(rc.ids) == 0:
+        sys.exit("No engines found")
+    print(len(rc.ids), "engines")    
+    
+    dview = rc[:] 
+    
+    dview.push(dict(h5path=h5path, endpoint=endpoint, h5serv_domain=h5serv_domain))
+    
     with h5pyd.File(h5serv_domain, endpoint=endpoint) as f:
             dset = f[h5path]
             num_days = dset.shape[0]
             
     print("start processing")
-     
+        
     # run process_files on engines
     start_time = time.time()       
-    
-    output = []
-    for day in range(num_days):
-        print("day:", day, flush=True)
-        result = summary(day)
-        output.append(result)
-        
+   
+    output = dview.map_sync(summary, range(num_days))
     end_time = time.time()
-    
-        
-    for item in output:
+    print(">>>>> runtime: {0:6.3f}s".format(end_time - start_time))
+     
+    # sort the output by first field (filename) 
+    output_dict = {} 
+    for elem in output:
+        if type(elem) is list:
+            # output from engines, break out each tuple
+            for item in elem:
+                k = item[0]
+                if k not in output_dict:
+                    output_dict[k] = item
+        else:
+            k = elem[0]
+            if k not in output_dict:
+                output_dict[k] = elem
+                    
+    keys = list(output_dict.keys())
+    keys.sort()
+    for k in keys:
         text = ""
-        for value in item:
+        values = output_dict[k]
+        for value in values:
             text += str(value) + "   "
         print(text)
-           
-    print(">>>>> runtime: {0:6.3f}s".format(end_time - start_time))
+   
 
 main()
