@@ -78,8 +78,10 @@ def main():
         sys.exit("No filename specified!")
         
     if not args.path:
-        sys.exit("No h5path specified!")
-        
+        h5path = "/HDFEOS/GRIDS/NCEP/Data Fields/Tair_2m"
+    else:
+        h5path = args.path
+
     if not args.endpoint:
         endpoint = "http://127.0.0.1:5000"
     else:
@@ -89,13 +91,11 @@ def main():
     else:
         nodes = 1
     
-    h5path = args.path
     h5serv_domain = args.filename
     print("domain:", h5serv_domain)
     print("h5path:", h5path)
     print("endpoint:", endpoint)
     print("nodes:", nodes)
-    
         
     with h5pyd.File(h5serv_domain, endpoint=endpoint) as f:
             dset = f[h5path]
