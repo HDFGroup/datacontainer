@@ -72,7 +72,7 @@ def main():
     print("endpoint:", endpoint)
     
         
-    with h5pyd.File(h5serv_domain, endpoint=endpoint) as f:
+    with h5pyd.File(h5serv_domain, 'r', endpoint=endpoint) as f:
             dset = f[h5path]
             num_days = dset.shape[0]
             

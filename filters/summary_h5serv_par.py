@@ -20,7 +20,7 @@ def summary(day):
      
     return_value = None
           
-    with h5pyd.File(h5serv_domain, endpoint=endpoint) as f:
+    with h5pyd.File(h5serv_domain, 'r'. endpoint=endpoint) as f:
             dset = f[h5path]
      
             # mask fill value
