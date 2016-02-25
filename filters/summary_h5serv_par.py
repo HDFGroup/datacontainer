@@ -9,6 +9,24 @@ import h5pyd
 import numpy
 from ipyparallel import Client
 
+def series(s3uri, h5path, lat, lon):
+    # import within the function so the engines will pick them up
+    import sys
+    import os
+    import h5py
+    import numpy
+     
+    return_values = []
+    for download in s3.files(s3uri_prefix=s3uri):
+        file_path = download['local_filepath']   
+        file_name = os.path.basename(file_path)
+
+        with h5py.File(file_path, 'r') as f:
+            dset = f[h5path]
+            val = dset[lat, lon]
+            return_values.append( (file_name, val) )
+                
+    return return_values
 
 def summary(day):
     # import within the function so the engines will pick them up
@@ -88,7 +106,7 @@ def main():
         sys.exit("No engines found")
      
     if nodes > len(rc.ids):
-        sys.exit("Not engough engines!")
+        sys.exit("Not enough engines!")
      
     dview = rc[:nodes] 
     dview.push(dict(h5serv_domain=h5serv_domain, h5path=h5path, endpoint=endpoint))
@@ -101,7 +119,6 @@ def main():
     #num_days = 10
     output = dview.map_sync(summary, range(num_days))
     end_time = time.time()
-    print(">>>>> runtime: {0:6.3f}s".format(end_time - start_time))
      
     # sort the output by first field (filename) 
     output_dict = {} 
@@ -125,6 +142,8 @@ def main():
         for value in values:
             text += str(value) + "   "
         print(text)
+        
+    print(">>>>> runtime: {0:6.3f}s".format(end_time - start_time))
     
 
 main()
