@@ -20,7 +20,7 @@ def summary(day):
      
     return_value = None
           
-    with h5pyd.File(h5serv_domain, 'r'. endpoint=endpoint) as f:
+    with h5pyd.File(h5serv_domain, 'r', endpoint=endpoint) as f:
             dset = f[h5path]
      
             # mask fill value
@@ -41,6 +41,7 @@ def main():
     parser.add_argument('-f', "--filename", help="h5serv domain")
     parser.add_argument('-p', "--path", help="h5path")
     parser.add_argument('-e', "--endpoint", help="h5serv endpoint")
+    parser.add_argument('-n', "--nodes", help="number of engine nodes")
      
     # example file:
     # public AWS -
@@ -65,12 +66,17 @@ def main():
         endpoint = "http://127.0.0.1:5000"
     else:
         endpoint = args.endpoint
+    if args.nodes:
+        nodes = int(args.nodes)
+    else:
+        nodes = 1
     
     h5path = args.path
     h5serv_domain = args.filename
     print("domain:", h5serv_domain)
     print("h5path:", h5path)
     print("endpoint:", endpoint)
+    print("nodes:", nodes)
     
         
     with h5pyd.File(h5serv_domain, endpoint=endpoint) as f:
@@ -80,9 +86,11 @@ def main():
     rc = Client()
     if len(rc.ids) == 0:
         sys.exit("No engines found")
-    print(len(rc.ids), "engines")    
-    
-    dview = rc[:] 
+     
+    if nodes > len(rc.ids):
+        sys.exit("Not engough engines!")
+     
+    dview = rc[:nodes] 
     dview.push(dict(h5serv_domain=h5serv_domain, h5path=h5path, endpoint=endpoint))
      
     print("start processing")
