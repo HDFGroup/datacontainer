@@ -104,3 +104,9 @@ Date        Time    Filter                Dataset	Size(GB)   Compression  Chunki
 02/27/16     1:54   Summary_h5serv_par.py  NCEP3    122         None         None       OSDC        he.xxlarge      16     n/a             950.5        s3://hdftest/h5serv_result/ncep3_concat_summary_node_16.txt
 02/27/16     2:09   Summary_h5serv_par.py  NCEP3    122         None         None       OSDC        he.xxlarge      32     n/a             939.0        s3://hdftest/h5serv_result/ncep3_concat_summary_node_32.txt
 
+03/02/16     6:03   Summary_h5serv_par.py  NCEP3     46         gzip_9       1x72x144   OSDC        he.xxlarge       1     n/a            3498.3        s3://hdftest/h5serv_result/ncep3_1_72_144_gzip9_summary_node_1.txt
+03/02/16     6:47   Summary_h5serv_par.py  NCEP3     46         gzip_9       1x72x144   OSDC        he.xxlarge       2     n/a            2670.0        s3://hdftest/h5serv_result/ncep3_1_72_144_gzip9_summary_node_2.txt
+03/02/16     7:25   Summary_h5serv_par.py  NCEP3     46         gzip_9       1x72x144   OSDC        he.xxlarge       4     n/a            2253.4        s3://hdftest/h5serv_result/ncep3_1_72_144_gzip9_summary_node_4.txt
+03/02/16     7:44   Summary_h5serv_par.py  NCEP3     46         gzip_9       1x72x144   OSDC        he.xxlarge       8     n/a            2029.9        s3://hdftest/h5serv_result/ncep3_1_72_144_gzip9_summary_node_8.txt
+03/02/16     8:26   Summary_h5serv_par.py  NCEP3     46         gzip_9       1x72x144   OSDC        he.xxlarge      16     n/a            1625.9        s3://hdftest/h5serv_result/ncep3_1_72_144_gzip9_summary_node_16.txt
+03/02/16     8:58   Summary_h5serv_par.py  NCEP3     46         gzip_9       1x72x144   OSDC        he.xxlarge      32     n/a            1798.3        s3://hdftest/h5serv_result/ncep3_1_72_144_gzip9_summary_node_32.txt
