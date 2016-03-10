@@ -21,7 +21,7 @@ print("filename,", f.filename)
  
 print("create dataset")
  
-dset = f.create_dataset('dset', (cube_side, cube_side, cube_side), dtype='f4')
+dset = f.create_dataset('dset', (cube_side, cube_side, cube_side), dtype='f8')
 
 print("name:", dset.name)
 print("shape:", dset.shape)
