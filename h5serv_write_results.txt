@@ -1,0 +1,8 @@
+writedatacube.py, readdatacube.py runtime in seconds
+
+cube side    slice_size  total_size    write_nop  write_h5py   write_json(mac)  write_json    read_json    write_bin    read_bin
+
+ 64          32K           2M           0.346       0.355       0.977            2.471         2.711         1.672        1.883
+ 128        128K          16M           0.386       0.435       1.793           11.310        12.761         3.319        3.325
+ 256        512K         128M           0.563       0.977       4.987           58.009        64.813        12.901        8.011
+ 512       2048K           1G           1.908      24.111      24.451          370.270       431.823        73.161       34.665
