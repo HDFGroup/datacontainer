@@ -1,4 +1,6 @@
-writedatacube.py, readdatacube.py runtime in seconds
+write_h5serv.py, read_h5serv.py runtime in seconds
+client: m1_small
+server: He_xxlarge
 
 cube side    slice_size  total_size    write_nop  write_h5py   write_json(mac)  write_json    read_json    write_bin    read_bin
 
