@@ -1,38 +1,38 @@
-### How to setup NFS on OSDC
+# How to setup NFS on OSDC
  
 
 Instructions for installing NFS
 
 ## On the server 
 
-# Install NFS:
+### Install NFS:
 
-   $ with_proxy sudo -E apt-get install nfs-kernel-server
+    $ with_proxy sudo -E apt-get install nfs-kernel-server
    
-# Make the directory to be exported public read/write:
+### Make the directory to be exported public read/write:
 
-   $ sudo chmod 777 /mnt/hdfdata/
+    $ sudo chmod 777 /mnt/hdfdata/
    
-# Add entry to /etc/exports:
+### Add entry to /etc/exports:
 
-   /mnt/hdfdata     172.17.192.0/24(rw,fsid=0,insecure,no_subtree_check,async)
+    /mnt/hdfdata     172.17.192.0/24(rw,fsid=0,insecure,no_subtree_check,async)
 
-# Start service:
+### Start service:
 
-   $ sudo service nfs-kernel-server restart
+    $ sudo service nfs-kernel-server restart
    
-# configure to run on startup:
+### configure to run on startup:
  
-   $ sudo update-rc.d nfs-kernel-server defaults
+    $ sudo update-rc.d nfs-kernel-server defaults
    
 ## On the client:
 
-# Install software:
+### Install software:
 
-   $ with_proxy sudo -E install nfs-common
+    $ with_proxy sudo -E install nfs-common
    
-# Mount remote filesystem:
+### Mount remote filesystem:
 
-   $ sudo mount -v -t nfs -o proto=tcp,port=2049 172.17.192.26:/ /mnt
+    $ sudo mount -v -t nfs -o proto=tcp,port=2049 172.17.192.26:/ /mnt
    
-   where 172.17.192.26 should be adjusted to the actual IP of the NFS Server
+  where 172.17.192.26 should be adjusted to the actual IP of the NFS Server
