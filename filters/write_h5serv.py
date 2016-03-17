@@ -25,5 +25,3 @@ for i in range(n):
 print("done!")
 
 f.close() 
-
- 
