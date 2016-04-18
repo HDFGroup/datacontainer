@@ -1,0 +1,6 @@
+...
+84126 rows, min: -215 max:  378 stddev:  93.6982223588
+
+real	4m50.739s
+user	0m0.078s
+sys	0m0.017s
