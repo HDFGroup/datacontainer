@@ -30,6 +30,7 @@ def main():
     if len(vals) > 0:
     
         arr = np.array(vals, dtype="i4")
+         
         print(len(vals), "rows, min:", arr.min(), "max: ", arr.max(), "stddev: ", arr.std())
     else:
         print("no matches!")

@@ -1,6 +1,27 @@
-...
+
+Test System: i7 @ 3.5GHz, 32GB Ram, SSD
+
+ghcn_pytables.py
+----------------
 84126 rows, min: -215 max:  378 stddev:  93.6982223588
 
-real	4m50.739s
-user	0m0.078s
-sys	0m0.017s
+real	4m33.785s
+user	0m0.066s
+sys	0m0.014s
+
+ghcn_numpy.py
+--------------
+84126 rows, min: -215 max:  378 stddev:  93.6982223588
+
+real	4m48.702s
+user	0m0.061s
+sys	0m0.007s
+
+
+ghcn_numpy_eval.py
+------------------
+84126 rows, min: -215 max:  378 stddev:  93.6982223588
+
+real	5m31.665s
+user	0m0.062s
+sys	0m0.005s
