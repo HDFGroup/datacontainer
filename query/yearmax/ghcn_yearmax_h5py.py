@@ -7,10 +7,8 @@ Get Global max temperature by year
 """
 
 def main():
-    #filepath = "/data/ghcn.h5"  # 82 GB filepath
-    #filepath = "/Volumes/work/data/NOAA/ghcn/ghcn_h5/ghcn.h5"
-    filepath = "/Volumes/work/data/NOAA/ghcn/ghcn_h5/1763.h5"
-     
+    filepath = "/data/ghcn.h5"  # 82 GB filepath
+      
     block_size = 256 * 100
     # ghcn datatype:
     # "station": str(11) - station code
