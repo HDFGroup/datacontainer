@@ -7,7 +7,9 @@ Get Global max temperature by year
 """
 
 def main():
-    filepath = "/data/ghcn.h5"  # 82 GB filepath
+    #filepath = "/data/ghcn.h5"  # 82 GB filepath
+    # filepath = "/Volumes/work/data/NOAA/ghcn/ghcn_h5/1901.h5"
+    filepath = "../../util/ghcn/1901.h5"
       
     block_size = 256 * 100
     # ghcn datatype:
@@ -15,9 +17,9 @@ def main():
     # "date": str(8) - date as YYYYMMDD
     # "element": str(4) - obs type
     # "value": I32 - obs value
+    # "mflag" str(1) - m flag
     # "qflag" str(1) - q flag
-    # "qflag" str(1) - q flag
-    # "qflag" str(1) - q flag
+    # "sflag" str(1) - s flag
     # "obstime" str(4) - 24 hr time
      
     # following is from row 10000:
@@ -45,9 +47,12 @@ def main():
             obsval = row['value']
             if obsval == -9999:
                 continue
+            if row['qflag']:
+                continue  # failed quality check
             if year not in vals:
                 vals[year] = obsval
             elif obsval > vals[year]:
+                print((i+start), row)
                 vals[year] = obsval
         start = end  # go to next block
     f.close()
