@@ -52,7 +52,7 @@ def main():
             if year not in vals:
                 vals[year] = obsval
             elif obsval > vals[year]:
-                print((i+start), row)
+                #print((i+start), row)
                 vals[year] = obsval
         start = end  # go to next block
     f.close()
