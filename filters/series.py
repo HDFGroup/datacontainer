@@ -35,7 +35,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', "--filename", help="s3 uri")
     parser.add_argument('-p', "--path", help="h5path")
-    parser.add_argument("--lat", help="lattitude")
+    parser.add_argument("--lat", help="latitude")
     parser.add_argument("--lon", help="longitude")
      
     # example file:
@@ -67,7 +67,7 @@ def main():
         sys.exit("No h5path specified!")
         
     if not args.lat:
-        sys.exit("No lattitude specified!")
+        sys.exit("No latitude specified!")
         
     if not args.lon:
         sys.exit("No longitude specified!")

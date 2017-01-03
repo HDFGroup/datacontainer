@@ -26,31 +26,31 @@ class S3ParallelDownload(object):
 
     def freespace(self):
         if len(self.rc) == 0:
-            raise IOError("No egnines running")
+            raise IOError("No engines running")
         return self.dview.apply_sync(s3downloader.freespace)
 
     def usedspace(self):
         if len(self.rc) == 0:
-            raise IOError("No egnines running")
+            raise IOError("No engines running")
         return self.dview.apply_sync(s3downloader.usedspace)
 
     def clear(self, s3uri=None, remove_all=False):
         if len(self.rc) == 0:
-            raise IOError("No egnines running")
+            raise IOError("No engines running")
         return self.dview.apply_sync(s3downloader.clear,
                                      s3uri_prefix=s3uri,
                                      remove_all=remove_all)
 
     def getFiles(self, state=None, s3uri=None):
         if len(self.rc) == 0:
-            raise IOError("No egnines running")
+            raise IOError("No engines running")
         return self.dview.apply_sync(s3downloader.getFiles,
                                      state=state, s3uri_prefix=s3uri)
 
     def loadFiles(self, s3uris):
         print("loadFiles")
         if len(self.rc) == 0:
-            raise IOError("No egnines running")
+            raise IOError("No engines running")
         if type(s3uris) is not str or not s3uris.startswith("s3://"):
             raise IOError("Invalid argument to laodFiles")
             
